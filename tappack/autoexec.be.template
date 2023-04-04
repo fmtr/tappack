@@ -1,0 +1,18 @@
+import sys
+import string
+import json
+
+var paths={paths}
+
+var wd = tasmota.wd
+if size(wd) sys.path().push(wd) end
+
+for path:paths
+    sys.path().push(string.format("%s/%s", wd, path))
+end
+
+import {module_name}
+
+try {module_name}.autoexec() except 'attribute_error' end
+
+if size(wd) sys.path().pop() end
