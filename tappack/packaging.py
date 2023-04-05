@@ -34,7 +34,7 @@ class Packager:
         # Find all directory paths within the "module" subdirectory
         self.paths = []
         for path in self.module_path.rglob('*'):
-            if path.is_dir():
+            if path.is_dir() and (list(path.glob('*.be')) or list(path.glob('*.bec'))):
                 # Make the path relative to the "module" subdirectory
                 rel_path = path.relative_to(self.module_path)
                 self.paths.append(str(rel_path))
