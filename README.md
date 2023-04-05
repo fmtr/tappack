@@ -1,4 +1,4 @@
-# Tasmota Application Packager
+# `tappack`: Tasmota Application Packager
 
 This tool aims to simplify packaging Tasmota Berry code as a TAPP file, including basic dependency resolution. It can be
 run locally, but is primarily intended for use during a release workflow, e.g. GitHub Actions.
@@ -7,8 +7,8 @@ run locally, but is primarily intended for use during a release workflow, e.g. G
 
 It performs the following:
 
-* Reads your project manifest file, with a list of dependency URLs (other `.tapp` files).
-* Downloads each, extracts and merges, in a subfolder, it into your own code.
+* Reads your project manifest file (see below), with a list of dependency URLs (other `.tapp` files).
+* Downloads each, extracts and merges them, in a subfolder, it into your own code.
 * Auto-generates an `autoexec.be` for your library that sets up all the relevant dependency paths.
 * Packages the whole structure into a `.tapp` file ready for deployment.
 
