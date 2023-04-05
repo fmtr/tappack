@@ -6,6 +6,7 @@ Your project should contain a `tappack` manifest file, `tappack.yaml`. This shou
 mapping module names to URLs to a corresponding `.tapp` file. For example:
 
 ```yaml
+name: my_library
 dependencies:
   tools: https://github.com/fmtr/tools/releases/download/v0.0.1/tools.tapp
 ```
