@@ -2,7 +2,8 @@
 
 ## Manifest File
 
-Your project should contain a `tappack` manifest file, `tappack.yaml`. This should contain a field names `dependencies`,
+Your project should contain a `tappack` manifest file, `tappack.yaml`. This should contain a field names `name`
+and `dependencies`,
 mapping module names to URLs to a corresponding `.tapp` file. For example:
 
 ```yaml
@@ -29,4 +30,6 @@ end
 mod.autoexec=autoexec
 return mod
 ```
+
+
 
