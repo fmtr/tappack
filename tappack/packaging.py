@@ -11,6 +11,7 @@ ENCODING = 'utf-8'
 
 class Packager:
     def __init__(self, module_path):
+        module_path = Path(module_path or '.')
         self.module_path = Path(module_path).absolute().resolve()
         self.manifest_path = self.module_path / 'tappack.yaml'
         self.manifest = yaml.safe_load(self.manifest_path.read_text())
@@ -45,7 +46,7 @@ class Packager:
                 rel_path = path.relative_to(self.module_path)
                 self.paths.append(str(rel_path))
             else:
-                print(f'Skipping directory "{path}"')
+                print(f'Not adding directory to paths, as it contains no Berry code: "{path}"')
 
     def write_paths(self):
         # Write the directory paths to a file called paths.json within the "module" subdirectory
@@ -57,7 +58,9 @@ class Packager:
         tapp_path = Path(tapp_path).absolute().resolve()
         with zipfile.ZipFile(tapp_path, 'w', compression=zipfile.ZIP_STORED) as zip_file:
 
-            zip_file.writestr('autoexec.be', self.get_autoexec().encode(ENCODING))
+            autoexec = self.get_autoexec()
+            print(f'Writing generated "autoexec.be" to archive...')
+            zip_file.writestr('autoexec.be', autoexec.encode(ENCODING))
 
             for path in self.module_path.glob('**/*'):
 
@@ -94,6 +97,8 @@ class Packager:
 
         for key, replacement in replacements.items():
             text = text.replace(f'{{{key}}}', replacement)
+
+        print(f'Added paths to autoexec.be: {self.paths}')
 
         return text
 
