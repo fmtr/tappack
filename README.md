@@ -30,6 +30,10 @@ dependencies:
 
 Here `--module-path` should contain your Berry and manifest files.
 
+## Installing
+
+`$pip install tappack`
+
 ## No `autoexec.be`
 
 Your module should _not_ contain an `autoexec.be`, as `tappack` will generate one. If you need to run any code in
