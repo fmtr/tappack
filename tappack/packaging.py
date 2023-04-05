@@ -5,23 +5,27 @@ from pathlib import Path
 
 import click
 import requests
+import yaml
 
 
 class Packager:
     def __init__(self, module_path):
         self.module_path = Path(module_path).absolute().resolve()
-        self.dependencies_path = self.module_path / 'dependencies.json'
+        self.manifest_path = self.module_path / 'tappack.yaml'
         self.dependencies = None
         self.paths = None
 
     def download_dependencies(self):
         # Load the contents of dependencies.json into a dictionary
-        self.dependencies = json.loads(self.dependencies_path.read_text())
+        self.dependencies = yaml.safe_load(self.manifest_path.read_text()).get('dependencies', {})
 
         # Loop through each key-value pair in the dependencies dictionary
         for name, url in self.dependencies.items():
             # Download the ZIP file from the URL and extract its contents into a subfolder with the same name as the key
+
+            print(f'Downloading dependency "{name}" from "{url}"...')
             response = requests.get(url)
+
             with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
                 (self.module_path / name).mkdir(parents=True, exist_ok=True)
                 zip_file.extractall(self.module_path / name)
