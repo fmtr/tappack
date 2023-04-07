@@ -14,21 +14,40 @@ It performs the following:
 
 ## Manifest File
 
-Your project needs to contain a `tappack` manifest file, `tappack.yaml`, with at least fields `name`
+Your project needs to contain a `tappack` manifest file, `manifest.yaml`, with at least fields `name`
 and `dependencies`. The latter is a mapping of module names to URLs of corresponding `.tapp` file. For example:
 
 ```yaml
 name: my_library
 dependencies:
   tools: https://github.com/fmtr/tools/releases/download/v0.0.1/tools.tapp
-  hct: https://github.com/fmtr/hct/releases/download/v0.3.27/hct.tapp
+
 ```
 
 ## Example Usage
 
-`$tappack --module-path ./my_library --tapp-path ./my_library.tapp`
+```bash
+$ tappack --help
+```
 
-Here `--module-path` should contain your Berry and manifest files.
+```console
+Usage: tappack [OPTIONS]
+
+Options:
+  --module-path DIRECTORY  Path to your module, containing any Berry files,
+                           manifests, assets, etc. Example:
+                           /usr/src/my_berry_project  [required]
+  --output FILE            Path to write the output .tapp package. Example:
+                           ~/my_project.tapp
+  --channel-id TEXT        Identifier for the release channel. Only relevant
+                           if your manifests contain release channel
+                           information. Example: development
+  --help                   Show this message and exit.
+```
+
+```bash
+$tappack --module-path /usr/src/my_berry_project --tapp-path ~/my_project.tapp
+```
 
 ## Installing
 
