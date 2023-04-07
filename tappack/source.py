@@ -57,7 +57,8 @@ class LocalPath:
         for name, dept in self.get_dependencies():
             yield from dept.iter_files(prefix / name)
 
-    def get_submodule_paths(self, file_data):
+    @staticmethod
+    def get_submodule_paths(file_data):
 
         paths = {
             path.parent
