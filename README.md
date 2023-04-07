@@ -24,6 +24,30 @@ dependencies:
 
 ```
 
+You can also specify when a dependency should be read from a local path (with be recursed automatically) as follows:
+
+```yaml
+name: my_library
+dependencies:
+  my_dependency:
+    .type: LocalPath
+    path: /usr/src/my_dependency
+```
+
+Release channels are also supported. So pulling from a URL during normal packaging, but from a local path during a
+development build (i.e. with parameter `--channel-id development`), is done like this:
+
+```yaml
+name: my_library
+dependencies:
+  tools:
+    .type: URL
+    url: https://github.com/fmtr/tools/releases/download/v0.0.1/tools.tapp
+    .channel:development:
+      .type: LocalPath
+      path: /usr/src/tools.be/module
+```
+
 ## Example Usage
 
 ```bash
