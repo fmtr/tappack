@@ -43,9 +43,10 @@ dependencies:
   tools:
     .type: URL
     url: https://github.com/fmtr/tools/releases/download/v0.0.1/tools.tapp
-    .channel:development:
-      .type: LocalPath
-      path: /usr/src/tools.be/module
+    .channels:
+      development:
+        .type: LocalPath
+        path: /fm/tools.be/module
 ```
 
 ## Example Usage

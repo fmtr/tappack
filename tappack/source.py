@@ -107,8 +107,8 @@ class LocalPath:
             if type(data) is str:
                 data = {'.type': 'URL', 'url': data}
 
-            if self.channel_id and (channel_field := f'.channel:{self.channel_id}') in data:
-                data = data[channel_field]
+            if self.channel_id in (channels := data.get('.channels', {})):
+                data = channels[self.channel_id]
 
             class_name = data.pop('.type', None)
             source_class = class_map.get(class_name)
