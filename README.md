@@ -24,7 +24,8 @@ dependencies:
 
 ```
 
-You can also specify when a dependency should be read from a local path (with be recursed automatically) as follows:
+You can also specify when a dependency should be read from a local path (which will be recursed automatically) as
+follows:
 
 ```yaml
 name: my_library
