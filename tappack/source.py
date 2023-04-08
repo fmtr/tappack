@@ -6,12 +6,16 @@ from pathlib import Path
 import requests
 import yaml
 
-from tappack.constants import ENCODING
-
-NAME_MANIFEST = 'manifest.yaml'
+from tappack.constants import ENCODING, NAME_MANIFEST
 
 
-class LocalPath:
+class Source:
+
+    def iter_files(self):
+        raise NotImplemented()
+
+
+class LocalPath(Source):
 
     def __init__(self, path, name=None, channel_id=None):
 
@@ -38,6 +42,13 @@ class LocalPath:
             self.manifest = {}
 
     def iter_files(self, prefix=None):
+        """
+
+        Generator that recursively iterates any files in the specified path, then any files in any sub-dependencies,
+        passing down the current path prefix, plus the name of the dependency. This yields tuples containing the
+        relative path of each file paired with the file data as bytes.
+
+        """
 
         print(f'Iterating dependency in path "{self.path}"...')
 
@@ -67,17 +78,7 @@ class LocalPath:
         }
         return paths
 
-    def write(self, path_tapp):
-        # Create a ZIP (tapp) file containing the entire module directory structure
-        file_data = dict(self.iter_files())
-        path_tapp = Path(path_tapp or (Path('.') / self.name).with_suffix('.tapp')).absolute().resolve()
-        file_data_autoexec = {Path('autoexec.be'): self.generate_autoexec(file_data).encode(ENCODING)}
-        with zipfile.ZipFile(path_tapp, 'w', compression=zipfile.ZIP_STORED) as zip_file:
-            for path, file_bytes in (file_data_autoexec | file_data).items():
-                print(f'Writing file "{path}" ({len(file_bytes)} bytes) to archive...')
-                zip_file.writestr(str(path), file_bytes)
 
-        print(f'Wrote output archive to "{path_tapp}"')
 
     def generate_autoexec(self, file_data):
 
@@ -103,7 +104,7 @@ class LocalPath:
             URL.__name__: URL,
         }
 
-        for name, data in self.manifest.get('dependencies', {}).items():
+        for name, data in self.manifest.copy().get('dependencies', {}).items():
 
             if type(data) is str:
                 data = {'.type': 'URL', 'url': data}
@@ -120,20 +121,45 @@ class LocalPath:
             source = source_class(**data)
             yield name, source
 
+    def build_archive(self):
+        # Create a ZIP (tapp) file containing the entire module directory structure
+        file_data = dict(self.iter_files())
 
-class URL(LocalPath):
+        file_data_autoexec = {Path('autoexec.be'): self.generate_autoexec(file_data).encode(ENCODING)}
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, 'w', compression=zipfile.ZIP_STORED) as zip_file:
+            for path, file_bytes in (file_data_autoexec | file_data).items():
+                print(f'Writing file "{path}" ({len(file_bytes)} bytes) to archive...')
+                zip_file.writestr(str(path), file_bytes)
+
+        return buffer.getvalue()
+
+    def write(self, path_tapp):
+        path_tapp = Path(path_tapp or (Path('.') / self.name).with_suffix('.tapp')).absolute().resolve()
+        archive_bytes = self.build_archive()
+        print(f'Writing output archive ({len(archive_bytes)} bytes) to "{path_tapp}"...')
+
+
+class URL(Source):
 
     def __init__(self, name, url, channel_id=None):
         self.name = name
         self.url = url
 
+    def get_url(self):
+        return self.url
+
+    def get_content(self):
+        print(f'Downloading dependency "{self.name}" from "{self.url}"...')
+        response = requests.get(self.get_url())
+        return response.content
+
     def iter_files(self, prefix=None):
         prefix = Path(prefix or '.')
 
-        print(f'Downloading dependency "{self.name}" from "{self.url}"...')
-        response = requests.get(self.url)
+        content = self.get_content()
 
-        with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
+        with zipfile.ZipFile(io.BytesIO(content)) as zip_file:
             for info in zip_file.filelist:
                 data = zip_file.read(info.filename)
                 path = prefix / info.filename
