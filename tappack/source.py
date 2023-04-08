@@ -9,6 +9,26 @@ import yaml
 from tappack.constants import ENCODING, NAME_MANIFEST
 
 
+def from_manifest(classes, data, channel_id, extra_args=None):
+    class_map = {cls.__name__: cls for cls in classes}
+
+    channels = data.get('.channels', {})
+    if channel_id in channels:
+        data = channels[channel_id]
+
+    class_name = data.pop('.type', None)
+    source_class = class_map.get(class_name)
+    if source_class is None:
+        if channels:
+            return None
+        else:
+            raise ValueError(f"Invalid object type: {class_name}")
+    data = data | (extra_args or {})
+    data = {key: value for key, value in data.items() if not key.startswith('.')}
+    obj = source_class(**data)
+    return obj
+
+
 class Source:
 
     def iter_files(self):
@@ -78,8 +98,6 @@ class LocalPath(Source):
         }
         return paths
 
-
-
     def generate_autoexec(self, file_data):
 
         paths = self.get_submodule_paths(file_data)
@@ -99,26 +117,20 @@ class LocalPath(Source):
 
     def get_dependencies(self):
 
-        class_map = {
-            LocalPath.__name__: LocalPath,
-            URL.__name__: URL,
-        }
-
         for name, data in self.manifest.copy().get('dependencies', {}).items():
 
             if type(data) is str:
                 data = {'.type': 'URL', 'url': data}
 
-            if self.channel_id in (channels := data.get('.channels', {})):
-                data = channels[self.channel_id]
+            source = from_manifest({LocalPath, URL}, data, self.channel_id,
+                                   {'name': name, 'channel_id': self.channel_id})
 
-            class_name = data.pop('.type', None)
-            source_class = class_map.get(class_name)
-            if source_class is None:
-                raise ValueError(f"Invalid object type: {class_name}")
-            data = data | {'name': name, 'channel_id': self.channel_id}
-            data = {key: value for key, value in data.items() if not key.startswith('.')}
-            source = source_class(**data)
+            if not source:
+                msg = f'Data resulted in no object. ' \
+                      f'This should be when the object only has channel config, and that channel is not specified. {data}'
+                logging.warning(msg)
+                continue
+
             yield name, source
 
     def build_archive(self):
