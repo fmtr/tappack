@@ -114,7 +114,7 @@ things:
 
 To serve a project:
 
-`tappack-server --project /usr/src/my_project`
+`$tappack-server --project /usr/src/my_project`
 
 You can serve as many projects as you like, for example:
 
