@@ -1,5 +1,4 @@
 import re
-from datetime import datetime
 from pathlib import Path
 
 from tappack import constants
@@ -11,18 +10,20 @@ PATTERN_VERSION = r'(?P<version>(?P<major>0|[1-9]\d*)\.' \
                   r'(?:\+(?P<build>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)'
 
 
-class VersionPatch:
+class Version:
 
-    def __init__(self, path, pattern, channel_id, encoding=constants.ENCODING):
+    def __init__(self, path, pattern, channel_id, encoding=constants.ENCODING, inc_patch=1):
         self.path = Path(path)
         self.pattern = pattern.format(version=PATTERN_VERSION)
         self.rx = re.compile(self.pattern)
         self.encoding = encoding
         self.channel_id = channel_id
+        self.inc_patch = inc_patch
 
     def version_replacer(self, match):
-        build = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
+        build = constants.RUNTIME.strftime("%Y.%m.%d-%H.%M.%S")
         major, minor, patch = [int(match.group(name)) for name in ['major', 'minor', 'patch']]
+        patch += self.inc_patch
         version = f'{major}.{minor}.{patch}-{self.channel_id}+{build}'
         text = match.group(0).replace(match.group('version'), version)
         return text
