@@ -41,11 +41,11 @@ You can also specify GitHub Release assets:
 name: my_library
 dependencies:
   tools:
-  .type: GitHubReleaseAsset
-  org: fmtr
-  version: v0.0.9 # Omit this field for the latest version.
-  repo: tools.be
-  filename: tools.tapp
+    .type: GitHubReleaseAsset
+    org: fmtr
+    version: v0.0.9 # Omit this field for the latest version.
+    repo: tools.be
+    filename: tools.tapp
 ```
 
 Release channels are also supported. So pulling from a URL during normal packaging, but from a local path during a
