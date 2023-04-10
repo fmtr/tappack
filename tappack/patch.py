@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from pathlib import Path
 
 from tappack import constants
@@ -21,7 +22,7 @@ class Version:
         self.inc_patch = inc_patch
 
     def version_replacer(self, match):
-        build = constants.RUNTIME.strftime("%Y.%m.%d-%H.%M.%S")
+        build = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
         major, minor, patch = [int(match.group(name)) for name in ['major', 'minor', 'patch']]
         patch += self.inc_patch
         version = f'{major}.{minor}.{patch}-{self.channel_id}+{build}'
