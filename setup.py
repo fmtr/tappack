@@ -27,10 +27,16 @@ setup(
         'click',
         'pyyaml'
     ],
-    extras_require={},
+    extras_require={
+        'server': [
+            'flask',
+            'pyngrok'
+        ]
+    },
     entry_points={
         'console_scripts': [
             f'{name} = {name}.packaging:main',
+            f'{name}-server = {name}.server:main',
         ],
     }
 )

@@ -65,6 +65,7 @@ class LocalPath(Source):
 
         self.dependencies = list(self.get_dependencies())
         self.patches = self.get_patches()
+        self.code_mask = self.manifest.get('code_mask')
 
     def iter_files(self, prefix=None):
         """
@@ -154,11 +155,12 @@ class LocalPath(Source):
                 print(f'Writing file "{path}" ({len(file_bytes)} bytes) to archive...')
                 zip_file.writestr(str(path), file_bytes)
 
-        return buffer.getvalue()
+        buffer.seek(0)
+        return buffer
 
     def write(self, path_tapp):
         path_tapp = Path(path_tapp or (Path('.') / self.name).with_suffix('.tapp')).absolute().resolve()
-        archive_bytes = self.build_archive()
+        archive_bytes = self.build_archive().getvalue()
         print(f'Writing output archive ({len(archive_bytes)} bytes) to "{path_tapp}"...')
         path_tapp.write_bytes(archive_bytes)
 

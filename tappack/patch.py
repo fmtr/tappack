@@ -29,6 +29,8 @@ class Version:
         return text
 
     def apply_text(self, text: str):
+        print(f'Patching file ({self.__class__.__name__}) "{self.path}"...')
+
         text = self.rx.sub(self.version_replacer, text)
         return text
 
