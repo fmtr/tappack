@@ -20,7 +20,7 @@ and `dependencies`. The latter is a mapping of module names to URLs of correspon
 ```yaml
 name: my_library
 dependencies:
-  tools: https://github.com/fmtr/tools/releases/download/v0.0.1/tools.tapp
+  my_tools: https://example.com/my_tools.tapp
 
 ```
 
@@ -33,6 +33,19 @@ dependencies:
   my_dependency:
     .type: LocalPath
     path: /usr/src/my_dependency
+```
+
+You can also specify GitHub Release assets:
+
+```yaml
+name: my_library
+dependencies:
+  tools:
+  .type: GitHubReleaseAsset
+  org: fmtr
+  version: v0.0.9 # Omit this field for the latest version.
+  repo: tools.be
+  filename: tools.tapp
 ```
 
 Release channels are also supported. So pulling from a URL during normal packaging, but from a local path during a
