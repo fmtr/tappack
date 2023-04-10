@@ -7,6 +7,7 @@ import requests
 import yaml
 
 from tappack.constants import ENCODING, NAME_MANIFEST
+from tappack.patch import VersionPatch
 
 
 def from_manifest(classes, data, channel_id, extra_args=None):
@@ -61,6 +62,9 @@ class LocalPath(Source):
 
             self.manifest = {}
 
+        self.dependencies = list(self.get_dependencies())
+        self.patches = self.get_patches()
+
     def iter_files(self, prefix=None):
         """
 
@@ -71,8 +75,9 @@ class LocalPath(Source):
         """
 
         print(f'Iterating dependency in path "{self.path}"...')
-
         prefix = Path(prefix or '.')
+
+        file_data = {}
 
         for path in self.path.rglob('*'):
             if path.is_dir():
@@ -83,10 +88,15 @@ class LocalPath(Source):
 
             if prefix:
                 path = Path(prefix) / path
-            yield path, file_bytes
+            file_data[path] = file_bytes
 
-        for name, dept in self.get_dependencies():
-            yield from dept.iter_files(prefix / name)
+        for name, dept in self.dependencies:
+            dept_data = dept.iter_files(prefix / name)
+            file_data.update(dept_data)
+
+        file_data = self.apply_patches(file_data, prefix)
+
+        return file_data
 
     @staticmethod
     def get_submodule_paths(file_data):
@@ -136,11 +146,10 @@ class LocalPath(Source):
     def build_archive(self):
         # Create a ZIP (tapp) file containing the entire module directory structure
         file_data = dict(self.iter_files())
-
-        file_data_autoexec = {Path('autoexec.be'): self.generate_autoexec(file_data).encode(ENCODING)}
+        file_data = {Path('autoexec.be'): self.generate_autoexec(file_data).encode(ENCODING)} | file_data
         buffer = io.BytesIO()
         with zipfile.ZipFile(buffer, 'w', compression=zipfile.ZIP_STORED) as zip_file:
-            for path, file_bytes in (file_data_autoexec | file_data).items():
+            for path, file_bytes in file_data.items():
                 print(f'Writing file "{path}" ({len(file_bytes)} bytes) to archive...')
                 zip_file.writestr(str(path), file_bytes)
 
@@ -150,6 +159,29 @@ class LocalPath(Source):
         path_tapp = Path(path_tapp or (Path('.') / self.name).with_suffix('.tapp')).absolute().resolve()
         archive_bytes = self.build_archive()
         print(f'Writing output archive ({len(archive_bytes)} bytes) to "{path_tapp}"...')
+        path_tapp.write_bytes(archive_bytes)
+
+    def get_patches(self):
+        patches = {}
+        for data in self.manifest.copy().get('patches', []):
+            obj = from_manifest({VersionPatch}, data, self.channel_id, {'channel_id': self.channel_id})
+            patches.setdefault(obj.path, [])
+            patches[obj.path].append(obj)
+
+        return patches
+
+    def apply_patches(self, file_data, prefix):
+
+        for path, patches in self.patches.items():
+
+            if prefix / path in file_data:
+                for patch_obj in patches:
+                    file_data[prefix / path] = patch_obj.apply(file_data[prefix / path])
+                    file_data
+            else:
+                msg = f'Manifest for "{self.name}" defines a patch that targets path "{path}", but no such path was found.'
+                logging.warning(msg)
+        return file_data
 
 
 class URL(Source):
@@ -171,11 +203,15 @@ class URL(Source):
 
         content = self.get_content()
 
+        file_data = {}
+
         with zipfile.ZipFile(io.BytesIO(content)) as zip_file:
             for info in zip_file.filelist:
                 data = zip_file.read(info.filename)
                 path = prefix / info.filename
-                yield path, data
+                file_data[path] = data
+
+        return file_data
 
 
 if __name__ == '__main__':
