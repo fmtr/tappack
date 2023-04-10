@@ -1,13 +1,14 @@
 import io
 import logging
 import zipfile
+from functools import cached_property
 from pathlib import Path
 
 import requests
 import yaml
 
 from tappack.constants import ENCODING, NAME_MANIFEST
-from tappack.patch import VersionPatch
+from tappack.patch import Version
 
 
 def from_manifest(classes, data, channel_id, extra_args=None):
@@ -132,7 +133,7 @@ class LocalPath(Source):
             if type(data) is str:
                 data = {'.type': 'URL', 'url': data}
 
-            source = from_manifest({LocalPath, URL}, data, self.channel_id,
+            source = from_manifest({LocalPath, URL, GitHubReleaseAsset}, data, self.channel_id,
                                    {'name': name, 'channel_id': self.channel_id})
 
             if not source:
@@ -164,7 +165,12 @@ class LocalPath(Source):
     def get_patches(self):
         patches = {}
         for data in self.manifest.copy().get('patches', []):
-            obj = from_manifest({VersionPatch}, data, self.channel_id, {'channel_id': self.channel_id})
+            obj = from_manifest({Version}, data, self.channel_id, {'channel_id': self.channel_id})
+            if not obj:
+                msg = f'Manifest data resulted in no patch object. ' \
+                      f'This should be when the object only has channel config, and that channel is not specified. {data}'
+                logging.warning(msg)
+                continue
             patches.setdefault(obj.path, [])
             patches[obj.path].append(obj)
 
@@ -190,12 +196,9 @@ class URL(Source):
         self.name = name
         self.url = url
 
-    def get_url(self):
-        return self.url
-
     def get_content(self):
         print(f'Downloading dependency "{self.name}" from "{self.url}"...')
-        response = requests.get(self.get_url())
+        response = requests.get(self.url)
         return response.content
 
     def iter_files(self, prefix=None):
@@ -212,6 +215,42 @@ class URL(Source):
                 file_data[path] = data
 
         return file_data
+
+
+class GitHubReleaseAsset(URL):
+
+    def __init__(self, name, org, repo, filename, version=None, channel_id=None):
+        self.name = name
+        self.org = org
+        self.repo = repo
+        self.filename = filename
+        self.version = version
+        self.channel_id = channel_id
+
+    def get_latest(self):
+        url = f"https://api.github.com/repos/{self.org}/{self.repo}/releases/latest"
+
+        headers = {
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28'
+        }
+
+        response = requests.request("GET", url, headers=headers)
+        response_json = response.json()
+
+        tag = response_json.get('tag_name')
+
+        if not tag:
+            raise ValueError(f'No tag found for "{self.org}" and "{self.repo}"')
+
+        return tag
+
+    @cached_property
+    def url(self):
+        version = self.version or self.get_latest()
+        url = f'https://github.com/{self.org}/{self.repo}/releases/download/{version}/{self.filename}'
+
+        return url
 
 
 if __name__ == '__main__':
