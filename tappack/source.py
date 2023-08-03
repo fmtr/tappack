@@ -124,7 +124,12 @@ class LocalPath(Source):
 
         auto_import = str(bool(self.config.get('auto_import'))).lower()
 
-        replacements = {'paths': repr(paths), 'module_name': self.name, 'auto_import': auto_import}
+        replacements = {
+            'paths': repr(paths),
+            'module_name': self.name,
+            'auto_import': auto_import,
+            'channel_id': repr(self.channel_id) if self.channel_id else 'nil'
+        }
 
         for key, replacement in replacements.items():
             text = text.replace(f'{{{key}}}', replacement)

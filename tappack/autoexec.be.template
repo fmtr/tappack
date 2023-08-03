@@ -12,11 +12,13 @@ TAPP_METADATA=global.TAPP_METADATA!=nil?global.TAPP_METADATA:{}
 
 TAPP_METADATA['{module_name}']={
     'path': tasmota.wd,
-    'auto_import': {auto_import}
+    'auto_import': {auto_import},
+    'channel_id': {channel_id},
 }
 
 if TAPP_METADATA['{module_name}']['auto_import']
     import {module_name}
+    global.{module_name}={module_name}
 end
 
 try import {module_name}_autoexec {module_name}_autoexec.autoexec(TAPP_METADATA['{module_name}']) except 'import_error' end

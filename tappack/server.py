@@ -16,6 +16,7 @@ except ImportError as exception:  # pragma: no cover
           f'To install them, run: pip install tappack[server] --upgrade'
     raise ImportError(msg) from exception
 
+CHANNEL_ID_NONE = 'none'
 
 class TappServer:
 
@@ -88,6 +89,9 @@ def start(paths, port, channel_id):
                    'Only relevant if your manifests contain release channel information. Example: development'
               )
 def main(project, port, channel_id):
+    if channel_id == CHANNEL_ID_NONE:
+        channel_id = None
+
     start(project, port, channel_id)
 
 
