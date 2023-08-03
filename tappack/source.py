@@ -12,11 +12,14 @@ from tappack.patch import Version
 
 
 def from_manifest(classes, data, channel_id, extra_args=None):
-    class_map = {cls.__name__: cls for cls in classes}
+    class_map = {cls.__name__: cls for cls in classes or {}}
 
     channels = data.get('.channels', {})
     if channel_id in channels:
         data = channels[channel_id]
+
+    if not classes:
+        return data
 
     class_name = data.pop('.type', None)
     source_class = class_map.get(class_name)
@@ -66,6 +69,7 @@ class LocalPath(Source):
         self.dependencies = list(self.get_dependencies())
         self.patches = self.get_patches()
         self.code_mask = self.manifest.get('code_mask')
+        self.config = from_manifest(None, self.manifest.get('config', {}), self.channel_id)
 
     def iter_files(self, prefix=None):
         """
@@ -118,7 +122,9 @@ class LocalPath(Source):
         path = Path(__file__).absolute().resolve().parent / 'autoexec.be.template'
         text = path.read_text(encoding=ENCODING)
 
-        replacements = {'paths': repr(paths), 'module_name': self.name}
+        auto_import = str(bool(self.config.get('auto_import'))).lower()
+
+        replacements = {'paths': repr(paths), 'module_name': self.name, 'auto_import': auto_import}
 
         for key, replacement in replacements.items():
             text = text.replace(f'{{{key}}}', replacement)

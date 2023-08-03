@@ -1,3 +1,4 @@
+import re
 import threading
 from pathlib import Path
 from time import sleep
@@ -72,6 +73,7 @@ def start(paths, port, channel_id):
             for name, packager in tapp_server.packagers.items():
                 url_tapp = f'{tunnel.tunnel.public_url}/{name}.tapp'
                 code_mask = packager.code_mask or CODE_MASK_DEFAULT
+                code_mask = re.sub(r'\s+', ' ', code_mask).strip()
                 code_snippet = code_mask.format(url=url_tapp, name=name)
                 msg = f'Serving project "{name}": `{code_snippet}`'
                 print(msg)

@@ -1,7 +1,7 @@
 import threading
 from time import sleep
 
-from pyngrok import ngrok
+from pyngrok import conf, ngrok
 
 
 class Tunnel:

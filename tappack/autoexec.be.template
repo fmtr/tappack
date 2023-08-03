@@ -1,18 +1,22 @@
 import sys
 import string
-import json
 
-var paths={paths}
+var PATHS={paths}
 
-var wd = tasmota.wd
-if size(wd) sys.path().push(wd) end
-
-for path:paths
-    sys.path().push(string.format("%s/%s", wd, path))
+sys.path().push(tasmota.wd)
+for path:PATHS
+    sys.path().push(string.format("%s/%s", tasmota.wd, path))
 end
 
-import {module_name}
+TAPP_METADATA=global.TAPP_METADATA!=nil?global.TAPP_METADATA:{}
 
-try {module_name}.autoexec() except 'attribute_error' end
+TAPP_METADATA['{module_name}']={
+    'path': tasmota.wd,
+    'auto_import': {auto_import}
+}
 
-if size(wd) sys.path().pop() end
+if TAPP_METADATA['{module_name}']['auto_import']
+    import {module_name}
+end
+
+try import {module_name}_autoexec {module_name}_autoexec.autoexec(TAPP_METADATA['{module_name}']) except 'import_error' end
