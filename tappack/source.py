@@ -69,7 +69,7 @@ class LocalPath(Source):
         self.dependencies = list(self.get_dependencies())
         self.patches = self.get_patches()
         self.code_mask = self.manifest.get('code_mask')
-        self.config = from_manifest(None, self.manifest.get('config', {}), self.channel_id)
+        self.autoexec = from_manifest(None, self.manifest.get('autoexec', {}), self.channel_id)
 
     def iter_files(self, prefix=None):
         """
@@ -122,12 +122,12 @@ class LocalPath(Source):
         path = Path(__file__).absolute().resolve().parent / 'autoexec.be.template'
         text = path.read_text(encoding=ENCODING)
 
-        auto_import = str(bool(self.config.get('auto_import'))).lower()
+        auto_import = str(bool(self.autoexec.get('import'))).lower()
 
         replacements = {
             'paths': repr(paths),
             'module_name': self.name,
-            'auto_import': auto_import,
+            'import': auto_import,
             'channel_id': repr(self.channel_id) if self.channel_id else 'nil'
         }
 
