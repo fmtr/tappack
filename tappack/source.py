@@ -1,11 +1,10 @@
 import io
 import logging
+import requests
+import yaml
 import zipfile
 from functools import cached_property
 from pathlib import Path
-
-import requests
-import yaml
 
 from tappack.constants import ENCODING, NAME_MANIFEST
 from tappack.patch import Version
@@ -212,6 +211,7 @@ class URL(Source):
     def get_content(self):
         print(f'Downloading dependency "{self.name}" from "{self.url}"...')
         response = requests.get(self.url)
+        response.raise_for_status()
         return response.content
 
     def iter_files(self, prefix=None):
@@ -232,15 +232,16 @@ class URL(Source):
 
 class GitHubReleaseAsset(URL):
 
-    def __init__(self, name, org, repo, filename, version=None, channel_id=None):
+    def __init__(self, name, org, repo, filename, version=None, prefix='v', channel_id=None):
         self.name = name
         self.org = org
         self.repo = repo
         self.filename = filename
         self.version = version
         self.channel_id = channel_id
+        self.prefix = prefix
 
-    def get_latest(self):
+    def get_tag_latest(self):
         url = f"https://api.github.com/repos/{self.org}/{self.repo}/releases/latest"
 
         headers = {
@@ -259,9 +260,15 @@ class GitHubReleaseAsset(URL):
         return tag
 
     @cached_property
+    def tag(self):
+        if not self.version:
+            return None
+        return f'{self.prefix or ""}{self.version}'
+
+    @cached_property
     def url(self):
-        version = self.version or self.get_latest()
-        url = f'https://github.com/{self.org}/{self.repo}/releases/download/{version}/{self.filename}'
+        tag = self.tag or self.get_tag_latest()
+        url = f'https://github.com/{self.org}/{self.repo}/releases/download/{tag}/{self.filename}'
 
         return url
 
