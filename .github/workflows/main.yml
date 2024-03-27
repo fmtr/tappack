@@ -26,9 +26,11 @@ jobs:
           pip install twine
 
       - name: Increment Version
+        env:
+          GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
         run: |
           git config --global user.name 'Frontmatter Actions'
-          git config --global user.email 'actions@frontmatter.ai'
+          git config --global user.email "$GIT_EMAIL"
           echo -n ${VERSION} > ${NAME}/version          
           git add ${NAME}/version
           
