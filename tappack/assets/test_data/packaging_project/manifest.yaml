@@ -1,0 +1,14 @@
+name: sample_app
+autoexec:
+  import: false
+  .channels:
+    local:
+      import: true
+dependencies:
+  plugin:
+    .type: URL
+    url: https://packages.invalid/plugin.tapp
+    .channels:
+      local:
+        .type: LocalPath
+        path: dependency

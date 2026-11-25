@@ -9,7 +9,7 @@ description = "A packager for Tasmota Berry Application (TAPP) apps"
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
 keywords = ["development", "berry", "script", "tasmota", "tapp"]
-dependencies = ["click", "PyYAML", "requests", "corio~=2.20.0"]
+dependencies = ["corio[http,sets]~=2.20.0"]
 license = "Apache-2.0"
 
 [project.urls]
@@ -18,7 +18,6 @@ Source = "https://github.com/fmtr/tappack"
 Issues = "https://github.com/fmtr/tappack/issues"
 
 [project.scripts]
-tappack-server = "tappack.entrypoints.server:main"
 tappack = "tappack.entrypoint:main"
 
 [[project.authors]]
@@ -26,12 +25,10 @@ name = "Frontmatter AI"
 email = "innovative.fowler@mask.pro.fmtr.dev"
 
 [project.optional-dependencies]
-server = ["flask", "pyngrok"]
-all = ["flask", "pyngrok"]
+test = ["corio[test]~=2.20.0"]
 
 [tool.corio.metadata]
 version = "0.3.2"
-port = 13
 base = "python"
 description = "A packager for Tasmota Berry Application (TAPP) apps"
 keywords = ["development", "berry", "script", "tasmota", "tapp"]
@@ -43,12 +40,8 @@ editables = ["corio"]
 
 [tool.corio.metadata.setup]
 
-[tool.corio.dependencies]
-install = ["click", "PyYAML", "requests", "corio"]
-server = ["flask", "pyngrok"]
-
 [tool.corio.test-envs]
-dev = []
+dev = ["dev"]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -63,9 +56,20 @@ asyncio_default_fixture_loop_scope = "function"
 
 [tool.tox]
 requires = ["tox>=4.22", "tox-uv>=1"]
-env_list = []
+env_list = ["prod"]
 
-[tool.tox.env]
+[tool.tox.env.dev]
+description = "Run tappack tests."
+deps = ["-e ../corio[http,sets,test]"]
+commands = [["python", "-m", "pytest", "-q", "{posargs:tappack/tests}"]]
+install_command = ["uv", "pip", "install", "--refresh-package", "corio", "{opts}", "{packages}"]
+skip_install = true
+
+[tool.tox.env.prod]
+description = "Run tappack tests."
+deps = ["corio[test]~=2.20.0"]
+commands = [["python", "-m", "pytest", "-q", "{posargs:tappack/tests}"]]
+install_command = ["uv", "pip", "install", "--refresh-package", "corio", "{opts}", "{packages}"]
 
 [tool.uv.config-settings-package.corio]
 editable_mode = "compat"
