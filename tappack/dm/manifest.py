@@ -17,7 +17,6 @@ class Metadata(dm.Base):
     org_github: str = Constants.ORG_NAME
     org_friendly: str = Constants.ORG_NAME_FRIENDLY
     description: str | None = None
-    port: int = 0
     docs: dict[str, Any] = Field(default_factory=dict)
     link_id: str | None = None
 

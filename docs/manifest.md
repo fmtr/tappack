@@ -14,7 +14,7 @@ The manifest describes the package name, version metadata, startup behavior, dep
 | `dependencies` | list of objects | Each object has a unique `name` and a dependency source. The name becomes the output subdirectory. |
 | `patches` | list | File changes applied while packaging, including channel-specific version updates. |
 
-`metadata.version` is the current project SemVer used as the base for automatic version patches. The Corio metadata fields `org_github`, `org_friendly`, `description`, `docs`, `link_id`, and `port` are optional; `link_id` selects a short URL to update after a Corio release. API credentials remain environment variables.
+`metadata.version` is the current project SemVer used as the base for automatic version patches. The Corio metadata fields `org_github`, `org_friendly`, `description`, `docs`, and `link_id` are optional; `link_id` selects a short URL to update after a Corio release. API credentials remain environment variables.
 
 `tappack` generates `autoexec.be` from the package's Berry file paths. Set `autoexec.import: true` to import the package during startup; the default is `false`. `autoexec`'s `.channels` field is a list of entries, each with a `channel` ID and the autoexec fields to use for that channel, as shown in the [sample manifest](quick-start.md).
 
