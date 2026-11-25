@@ -528,7 +528,7 @@
 </tr>
 </tbody>
 </table>
-<p><code>metadata.version</code> is the current project SemVer used as the base for automatic version patches. The Corio metadata fields <code>org_github</code>, <code>org_friendly</code>, <code>description</code>, <code>docs</code>, <code>link_id</code>, and <code>port</code> are optional; <code>link_id</code> selects a short URL to update after a Corio release. API credentials remain environment variables.</p>
+<p><code>metadata.version</code> is the current project SemVer used as the base for automatic version patches. The Corio metadata fields <code>org_github</code>, <code>org_friendly</code>, <code>description</code>, <code>docs</code>, and <code>link_id</code> are optional; <code>link_id</code> selects a short URL to update after a Corio release. API credentials remain environment variables.</p>
 <p><code>tappack</code> generates <code>autoexec.be</code> from the package's Berry file paths. Set <code>autoexec.import: true</code> to import the package during startup; the default is <code>false</code>. <code>autoexec</code>'s <code>.channels</code> field is a list of entries, each with a <code>channel</code> ID and the autoexec fields to use for that channel, as shown in the <a href="../quick-start/">sample manifest</a>.</p>
 <h2 id="dependencies">Dependencies</h2>
 <p>Each item under <code>dependencies</code> has a required <code>name</code> and a nested <code>source</code>. The name selects the output subdirectory. Put <code>.type</code> first inside each direct source. Supported source types are:</p>
