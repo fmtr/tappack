@@ -453,6 +453,8 @@ tappack<span class="w"> </span>--module-path<span class="w"> </span>sample_app<s
 <p>The command writes <code>sample_app.tapp</code> in the current directory. The manifest, Berry sources, and generated <code>autoexec.be</code> are stored in the archive. Dependencies are placed under their <code>name</code>: <code>helper_package/</code> comes from the local <code>shared_library</code> directory, and <code>tools_package/</code> uses the local <code>development_tools</code> directory because the <code>development</code> override is selected. Without that channel, <code>tools_package/</code> comes from the GitHub release asset.</p>
 <p>The example manifest is a real file used by the command above:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sample_app</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.3.4</span>
 
 <span class="nt">autoexec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">import</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
@@ -494,8 +496,9 @@ tappack<span class="w"> </span>--module-path<span class="w"> </span>sample_app<s
 <li><code>--module-path</code> selects the project directory. It defaults to the current directory.</li>
 <li><code>--output</code> selects the <code>.tapp</code> file. If omitted, the manifest name is used as the filename; when no manifest is present, the project directory name is used. The output is written in the current directory.</li>
 <li><code>--channel-id</code> selects channel-specific dependency, autoexec, and patch settings.</li>
+<li><code>--version</code> pins the patched Berry version exactly; it skips the automatic patch increment and channel/build suffixes.</li>
 </ul>
-<p>The same scalar settings can be supplied through <code>TAPPACK__MODULE_PATH</code>, <code>TAPPACK__OUTPUT</code>, and <code>TAPPACK__CHANNEL_ID</code>. For example, from <code>docs/examples</code>:</p>
+<p>The same scalar settings can be supplied through <code>TAPPACK__MODULE_PATH</code>, <code>TAPPACK__OUTPUT</code>, <code>TAPPACK__CHANNEL_ID</code>, and <code>TAPPACK__VERSION</code>. For example, from <code>docs/examples</code>:</p>
 <div class="language-bash highlight"><pre><span></span><code><span class="nv">TAPPACK__MODULE_PATH</span><span class="o">=</span>sample_app<span class="w"> </span><span class="nv">TAPPACK__CHANNEL_ID</span><span class="o">=</span>development<span class="w"> </span>tappack<span class="w"> </span>--output<span class="w"> </span>./sample_app.tapp
 </code></pre></div>
 <p>Corio settings can also load a dotenv file selected with <code>--env</code> or a YAML file selected with <code>--config</code>; CLI options take precedence over environment, dotenv, and YAML values.</p>
