@@ -456,18 +456,21 @@ tappack<span class="w"> </span>--module-path<span class="w"> </span>sample_app<s
 <span class="nt">autoexec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">import</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">  </span><span class="nt">.channels</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">development</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">import</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">development</span>
+<span class="w">      </span><span class="nt">settings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">import</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="nt">dependencies</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">shared</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">.type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LocalPath</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shared_library</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shared</span>
+<span class="w">    </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">.type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LocalPath</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shared_library</span>
 <span class="nt">patches</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">.channels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">development</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">.type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Version</span>
-<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src/version.be</span>
-<span class="w">        </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s">"var</span><span class="nv"> </span><span class="s">VERSION</span><span class="nv"> </span><span class="s">=</span><span class="nv"> </span><span class="s">'{version}'"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">development</span>
+<span class="w">        </span><span class="nt">patch</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">.type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Version</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src/version.be</span>
+<span class="w">          </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s">"var</span><span class="nv"> </span><span class="s">VERSION</span><span class="nv"> </span><span class="s">=</span><span class="nv"> </span><span class="s">'{version}'"</span>
 </code></pre></div>
 <h2 id="cli-options">CLI options</h2>
 <ul>
