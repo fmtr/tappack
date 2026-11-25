@@ -10,7 +10,7 @@ from tappack.entrypoint import main
 def test_cli_skips_channel_only_dependency_without_matching_channel(tmp_path, monkeypatch, channel_id):
     project = tmp_path / "channel_project"
     project.mkdir()
-    (project / "manifest.yaml").write_text(
+    (project / "manifest.yml").write_text(
         "name: channel_app\n"
         "dependencies:\n"
         "  - name: extension\n"
@@ -46,7 +46,7 @@ def test_cli_skips_channel_only_dependency_without_matching_channel(tmp_path, mo
 def test_cli_skips_unselected_and_missing_version_patches(tmp_path, monkeypatch):
     project = tmp_path / "patch_project"
     project.mkdir()
-    (project / "manifest.yaml").write_text(
+    (project / "manifest.yml").write_text(
         "name: patch_app\n"
         "patches:\n"
         "  - .channels:\n"

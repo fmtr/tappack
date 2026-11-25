@@ -7,12 +7,18 @@ from tappack.package import Package
 from tappack.paths import paths
 
 
-class Settings(sets.Base, cli_parse_args=True, cli_kebab_case=True):
+class Settings(
+    sets.Base,
+    cli_parse_args=True,
+    cli_kebab_case=True,
+    env_prefix_target="all",
+):
     paths: ClassVar = paths
 
     module_path: Path = Field(default_factory=Path.cwd)
     output: Path | None = None
     channel_id: str | None = None
+    version_override: str | None = Field(default=None, alias="version")
 
     @field_validator("module_path")
     @classmethod
@@ -22,7 +28,11 @@ class Settings(sets.Base, cli_parse_args=True, cli_kebab_case=True):
         return path.resolve()
 
     async def run(self) -> Path:
-        package = Package(self.module_path, channel_id=self.channel_id)
+        package = Package(
+            self.module_path,
+            channel_id=self.channel_id,
+            version=self.version_override,
+        )
         output = self.output or (Path.cwd() / f"{package.name}.tapp")
         return package.write(output)
 

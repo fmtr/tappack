@@ -537,6 +537,9 @@ requires-dist = [
     { name = "tabulate", marker = "extra == 'metrics'" },
     { name = "tabulate", marker = "extra == 'semantic'" },
     { name = "tabulate", marker = "extra == 'tabular'" },
+    { name = "tappack", marker = "extra == 'all'", specifier = ">=1.0.0a3" },
+    { name = "tappack", marker = "extra == 'dev'", specifier = ">=1.0.0a3" },
+    { name = "tappack", marker = "extra == 'infra'", specifier = ">=1.0.0a3" },
     { name = "tinynetrc", marker = "extra == 'all'" },
     { name = "tinynetrc", marker = "extra == 'netrc'" },
     { name = "tinynetrc", marker = "extra == 'spaces'" },
@@ -619,6 +622,7 @@ dev = [
     { name = "qdrant-client" },
     { name = "ripgrep-rs" },
     { name = "setuptools" },
+    { name = "tappack", specifier = ">=1.0.0a3" },
     { name = "tomlkit" },
     { name = "twine" },
     { name = "uvicorn", extras = ["standard"] },
@@ -1342,7 +1346,7 @@ wheels = [
 
 [[package]]
 name = "tappack"
-version = "1.0.0a0"
+version = "1.0.0a3"
 source = { editable = "." }
 dependencies = [
     { name = "corio", extra = ["http", "sets"] },

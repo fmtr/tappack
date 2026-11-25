@@ -8,7 +8,7 @@ from tappack.entrypoint import main
 def test_cli_fetches_asset_for_latest_github_tag(tmp_path, monkeypatch):
     project = tmp_path / "latest_project"
     project.mkdir()
-    (project / "manifest.yaml").write_text(
+    (project / "manifest.yml").write_text(
         "name: latest_app\n"
         "dependencies:\n"
         "  - name: extension\n"

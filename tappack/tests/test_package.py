@@ -9,7 +9,7 @@ from tappack.entrypoint import main
 def test_cli_downloads_url_dependency_from_zip(tmp_path, monkeypatch):
     project = tmp_path / "download_project"
     project.mkdir()
-    (project / "manifest.yaml").write_text(
+    (project / "manifest.yml").write_text(
         "name: download_app\n"
         "dependencies:\n"
         "  - name: extension\n"
@@ -52,8 +52,10 @@ def test_cli_applies_channel_version_patch(tmp_path, monkeypatch):
     project = tmp_path / "patch_project"
     source = project / "source"
     source.mkdir(parents=True)
-    (project / "manifest.yaml").write_text(
+    (project / "manifest.yml").write_text(
         "name: patch_app\n"
+        "metadata:\n"
+        "  version: 3.4.5\n"
         "patches:\n"
         "  - .channels:\n"
         "      - channel: local\n"
@@ -62,7 +64,7 @@ def test_cli_applies_channel_version_patch(tmp_path, monkeypatch):
         "        pattern: \"var VERSION = '{version}'\"\n",
         encoding="utf-8",
     )
-    (source / "version.be").write_text("var VERSION = '3.4.5'\n", encoding="utf-8")
+    (source / "version.be").write_text("var VERSION = '0.1.2'\n", encoding="utf-8")
     output = tmp_path / "patched.tapp"
     monkeypatch.setattr(
         sys,
@@ -87,3 +89,43 @@ def test_cli_applies_channel_version_patch(tmp_path, monkeypatch):
         r"var VERSION = '3\.4\.6-local\+\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}'\n",
         version_text,
     )
+
+
+def test_cli_pinned_version_replaces_package_version_exactly(tmp_path, monkeypatch):
+    project = tmp_path / "pinned_project"
+    source = project / "source"
+    source.mkdir(parents=True)
+    (project / "manifest.yml").write_text(
+        "name: pinned_app\n"
+        "metadata:\n"
+        "  version: 3.4.5\n"
+        "patches:\n"
+        "  - .type: Version\n"
+        "    path: source/version.be\n"
+        "    pattern: \"var VERSION = '{version}'\"\n",
+        encoding="utf-8",
+    )
+    (source / "version.be").write_text("var VERSION = '0.1.2'\n", encoding="utf-8")
+    output = tmp_path / "pinned.tapp"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "tappack",
+            "--module-path",
+            str(project),
+            "--output",
+            str(output),
+            "--channel-id",
+            "local",
+            "--version",
+            "7.2.0-rc.3",
+        ],
+    )
+
+    main()
+
+    with zipfile.ZipFile(output) as archive:
+        version_text = archive.read("source/version.be").decode("utf-8")
+
+    assert version_text == "var VERSION = '7.2.0-rc.3'\n"

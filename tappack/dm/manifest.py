@@ -1,15 +1,32 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any
 
 from pydantic import Field, field_validator
 
-from corio import Path, dm, iterator, sets
+from corio import Constants, Path, dm, iterator, version
 from tappack.dm.dependencies import DependencyEntry
 from tappack.dm.patch import Patch
 
 
-MANIFEST_FILENAME = "manifest.yaml"
+MANIFEST_FILENAME = "manifest.yml"
+
+
+class Metadata(dm.Base):
+    version: str | None = None
+    org_github: str = Constants.ORG_NAME
+    org_friendly: str = Constants.ORG_NAME_FRIENDLY
+    description: str | None = None
+    port: int = 0
+    docs: dict[str, Any] = Field(default_factory=dict)
+    link_id: str | None = None
+
+    @property
+    def version_obj(self) -> version.Version:
+        if self.version is None:
+            raise ValueError("Project metadata must define a version.")
+
+        return version.Version.parse(self.version)
 
 
 class AutoexecSettings(dm.Base):
@@ -44,10 +61,9 @@ class AutoexecChannelOverride(AutoexecSettings):
     channel: str = Field(min_length=1)
 
 
-class Manifest(sets.Base, dm.Base):
-    manifest_directory: ClassVar[Path | None] = None
-
+class Manifest(dm.Base):
     name: str | None = None
+    metadata: Metadata = Field(default_factory=Metadata)
     autoexec: Autoexec = Field(default_factory=Autoexec)
     dependencies: list[DependencyEntry] = Field(default_factory=list)
     patches: list[Patch] = Field(default_factory=list)
@@ -66,18 +82,11 @@ class Manifest(sets.Base, dm.Base):
         return dependencies
 
     @classmethod
-    def find_yaml_file(cls) -> Path | None:
-        directory = cls.manifest_directory or Path.cwd()
-        try:
-            return directory.find_up(MANIFEST_FILENAME)
-        except FileNotFoundError:
-            return None
-
-    @classmethod
     def in_directory(cls, directory: Path) -> Manifest:
         directory_path = Path(directory).resolve()
+        try:
+            manifest_path = directory_path.find_up(MANIFEST_FILENAME)
+        except FileNotFoundError:
+            return cls()
 
-        class DirectoryManifest(cls, cli_parse_args=False):
-            manifest_directory: ClassVar[Path] = directory_path
-
-        return DirectoryManifest()
+        return cls.model_validate(manifest_path.read_yaml() or {})

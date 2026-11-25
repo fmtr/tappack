@@ -87,7 +87,7 @@ def test_manifest_rejects_duplicate_channel_overrides(manifest_data):
 def test_cli_rejects_duplicate_dependency_names_without_writing(tmp_path, monkeypatch):
     project = tmp_path / "duplicate_project"
     project.mkdir()
-    (project / "manifest.yaml").write_text(
+    (project / "manifest.yml").write_text(
         "dependencies:\n"
         "  - name: widget\n"
         "    source:\n"
@@ -121,7 +121,7 @@ def test_cli_rejects_duplicate_dependency_names_without_writing(tmp_path, monkey
 def test_cli_rejects_missing_local_dependency_without_writing(tmp_path, monkeypatch):
     project = tmp_path / "local_project"
     project.mkdir()
-    (project / "manifest.yaml").write_text(
+    (project / "manifest.yml").write_text(
         "name: local_app\n"
         "dependencies:\n"
         "  - name: extension\n"

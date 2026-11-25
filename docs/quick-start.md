@@ -19,7 +19,7 @@ The example manifest is a real file used by the command above:
 
 ```yaml
 --8<--
-docs/examples/sample_app/manifest.yaml
+docs/examples/sample_app/manifest.yml
 --8<--
 ```
 
@@ -28,8 +28,9 @@ docs/examples/sample_app/manifest.yaml
 - `--module-path` selects the project directory. It defaults to the current directory.
 - `--output` selects the `.tapp` file. If omitted, the manifest name is used as the filename; when no manifest is present, the project directory name is used. The output is written in the current directory.
 - `--channel-id` selects channel-specific dependency, autoexec, and patch settings.
+- `--version` pins the patched Berry version exactly; it skips the automatic patch increment and channel/build suffixes.
 
-The same scalar settings can be supplied through `TAPPACK__MODULE_PATH`, `TAPPACK__OUTPUT`, and `TAPPACK__CHANNEL_ID`. For example, from `docs/examples`:
+The same scalar settings can be supplied through `TAPPACK__MODULE_PATH`, `TAPPACK__OUTPUT`, `TAPPACK__CHANNEL_ID`, and `TAPPACK__VERSION`. For example, from `docs/examples`:
 
 ```bash
 TAPPACK__MODULE_PATH=sample_app TAPPACK__CHANNEL_ID=development tappack --output ./sample_app.tapp

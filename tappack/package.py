@@ -10,9 +10,16 @@ from tappack.paths import paths
 
 
 class Package:
-    def __init__(self, path: Path, name: str | None = None, channel_id: str | None = None):
+    def __init__(
+        self,
+        path: Path,
+        name: str | None = None,
+        channel_id: str | None = None,
+        version: str | None = None,
+    ):
         self.path = Path(path).resolve()
         self.channel_id = channel_id
+        self.version = version
         self.manifest = Manifest.in_directory(self.path)
         self.name = name or self.manifest.name or self.path.name
 
@@ -51,7 +58,12 @@ class Package:
                 continue
 
             logger.info(f'Applying version patch to "{target}".')
-            file_data[target] = patch.apply(file_data[target], self.channel_id)
+            file_data[target] = patch.apply(
+                file_data[target],
+                self.channel_id,
+                self.manifest.metadata.version,
+                self.version,
+            )
 
         return file_data
 

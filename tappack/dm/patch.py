@@ -23,19 +23,31 @@ class VersionPatch(dm.Base):
     encoding: str = Constants.ENCODING
     inc_patch: int = 1
 
-    def apply(self, data: bytes, channel_id: str | None) -> bytes:
+    def apply(
+        self,
+        data: bytes,
+        channel_id: str | None,
+        base_version: str | None,
+        version_override: str | None = None,
+    ) -> bytes:
         expression = re.compile(self.pattern.format(version=PATTERN_VERSION))
         text = data.decode(self.encoding)
-        build = datetime.now(timezone.utc).strftime(
-            Constants.DATETIME_SEMVER_BUILD_FORMAT
-        )
+
+        if version_override is not None:
+            target = str(version.Version.parse(version_override))
+        else:
+            if base_version is None:
+                raise ValueError("A version patch requires metadata.version or --version.")
+
+            original = version.Version.parse(base_version)
+            patched = original.replace(patch=original.patch + self.inc_patch)
+            build = datetime.now(timezone.utc).strftime(
+                Constants.DATETIME_SEMVER_BUILD_FORMAT
+            )
+            target = str(patched.replace(prerelease=channel_id, build=build))
 
         def replace(match):
-            original = version.Version.parse(match.group("version"))
-            patched = original.replace(patch=original.patch + self.inc_patch)
-            patched = patched.replace(prerelease=channel_id, build=build)
-            replacement = str(patched)
-            return match.group(0).replace(match.group("version"), replacement)
+            return match.group(0).replace(match.group("version"), target)
 
         return expression.sub(replace, text).encode(self.encoding)
 

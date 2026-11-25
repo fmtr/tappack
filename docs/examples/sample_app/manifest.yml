@@ -1,4 +1,6 @@
 name: sample_app
+metadata:
+  version: 2.3.4
 
 autoexec:
   import: false

@@ -1,6 +1,6 @@
 # tappack
 
-`tappack` builds a Tasmota Berry project into a `.tapp` package. It reads a `manifest.yaml`, collects the project files and declared dependencies, applies channel-specific version patches, generates `autoexec.be`, and writes the resulting archive.
+`tappack` builds a Tasmota Berry project into a `.tapp` package. It reads a `manifest.yml`, collects the project files and declared dependencies, applies channel-specific version patches, generates `autoexec.be`, and writes the resulting archive.
 
 ## Install
 
