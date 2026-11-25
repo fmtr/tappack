@@ -1,18 +1,18 @@
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Literal
 
 from pydantic import Field, field_validator
 
-from corio import Constants, Path, dm, iterator
+from corio import Constants, Path, dm, iterator, version
 
 
 PATTERN_VERSION = (
-    r"(?P<version>(?P<major>0|[1-9]\d*)\."
-    r"(?P<minor>0|[1-9]\d*)\."
-    r"(?P<patch>0|[1-9]\d*)"
-    r"(?:-(?P<pre>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
-    r"(?:\+(?P<build>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
+    r"(?P<version>(?:0|[1-9]\d*)\."
+    r"(?:0|[1-9]\d*)\."
+    r"(?:0|[1-9]\d*)"
+    r"(?:-(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
+    r"(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
 )
 
 
@@ -26,15 +26,16 @@ class VersionPatch(dm.Base):
     def apply(self, data: bytes, channel_id: str | None) -> bytes:
         expression = re.compile(self.pattern.format(version=PATTERN_VERSION))
         text = data.decode(self.encoding)
-        build = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
+        build = datetime.now(timezone.utc).strftime(
+            Constants.DATETIME_SEMVER_BUILD_FORMAT
+        )
 
         def replace(match):
-            major, minor, patch = (
-                int(match.group(name))
-                for name in ("major", "minor", "patch")
-            )
-            version = f"{major}.{minor}.{patch + self.inc_patch}-{channel_id}+{build}"
-            return match.group(0).replace(match.group("version"), version)
+            original = version.Version.parse(match.group("version"))
+            patched = original.replace(patch=original.patch + self.inc_patch)
+            patched = patched.replace(prerelease=channel_id, build=build)
+            replacement = str(patched)
+            return match.group(0).replace(match.group("version"), replacement)
 
         return expression.sub(replace, text).encode(self.encoding)
 

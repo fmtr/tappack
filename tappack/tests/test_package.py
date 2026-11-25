@@ -84,6 +84,6 @@ def test_cli_applies_channel_version_patch(tmp_path, monkeypatch):
         version_text = archive.read("source/version.be").decode("utf-8")
 
     assert re.fullmatch(
-        r"var VERSION = '3\.4\.6-local\+\d{4}\.\d{2}\.\d{2}-\d{2}\.\d{2}\.\d{2}'\n",
+        r"var VERSION = '3\.4\.6-local\+\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}'\n",
         version_text,
     )

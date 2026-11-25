@@ -35,4 +35,4 @@ The [sample manifest](examples/sample_app/manifest.yaml) shows two dependency en
 
 A patch entry can be a direct `.type: Version` patch, which applies for every channel, or a `.channels` list. Each channel-list item puts `channel` beside the `.type: Version`, `path`, and `pattern` fields—there is no extra `patch` wrapper. Only the matching channel's patch is applied; if none matches, the patch is skipped.
 
-A version patch targets a project-relative `path` and a regular-expression `pattern` containing `{version}`. The matched semantic version's patch component is increased by `inc_patch` (default `1`), then the selected channel and a build timestamp are added. The sample manifest patches `src/version.be` only for the `development` channel.
+A version patch targets a project-relative `path` and a regular-expression `pattern` containing `{version}`. Tappack parses the matched value as SemVer and increases its patch component by `inc_patch` (default `1`). If a channel is selected, its ID becomes the prerelease; a Corio-formatted build timestamp is added as build metadata. The sample manifest patches `src/version.be` only for the `development` channel.
