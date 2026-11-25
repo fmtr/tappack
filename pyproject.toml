@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tappack"
-version = "0.3.2"
+version = "1.0.0-alpha.0"
 description = "A packager for Tasmota Berry Application (TAPP) apps"
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
@@ -28,7 +28,7 @@ email = "innovative.fowler@mask.pro.fmtr.dev"
 test = ["corio[test]~=2.20.0"]
 
 [tool.corio.metadata]
-version = "0.3.2"
+version = "1.0.0-alpha.0"
 base = "python"
 description = "A packager for Tasmota Berry Application (TAPP) apps"
 keywords = ["development", "berry", "script", "tasmota", "tapp"]
@@ -71,9 +71,15 @@ deps = ["corio[test]~=2.20.0"]
 commands = [["python", "-m", "pytest", "-q", "{posargs:tappack/tests}"]]
 install_command = ["uv", "pip", "install", "--refresh-package", "corio", "{opts}", "{packages}"]
 
+[tool.uv]
+prerelease = "if-necessary"
+
 [tool.uv.config-settings-package.corio]
 editable_mode = "compat"
 
 [tool.uv.sources.corio]
 path = "../corio"
 editable = true
+
+[tool.uv.prerelease-package]
+corio = "if-necessary"
