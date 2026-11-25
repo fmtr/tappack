@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=82", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tappack"
+version = "0.3.2"
+description = "A packager for Tasmota Berry Application (TAPP) apps"
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+keywords = ["development", "berry", "script", "tasmota", "tapp"]
+dependencies = ["click", "PyYAML", "requests", "corio~=2.20.0"]
+license = "Apache-2.0"
+
+[project.urls]
+Homepage = "https://github.com/fmtr/tappack"
+Source = "https://github.com/fmtr/tappack"
+Issues = "https://github.com/fmtr/tappack/issues"
+
+[project.scripts]
+tappack-server = "tappack.entrypoints.server:main"
+tappack = "tappack.entrypoint:main"
+
+[[project.authors]]
+name = "Frontmatter AI"
+email = "innovative.fowler@mask.pro.fmtr.dev"
+
+[project.optional-dependencies]
+server = ["flask", "pyngrok"]
+all = ["flask", "pyngrok"]
+
+[tool.corio.metadata]
+version = "0.3.2"
+port = 13
+base = "python"
+description = "A packager for Tasmota Berry Application (TAPP) apps"
+keywords = ["development", "berry", "script", "tasmota", "tapp"]
+org_github = "fmtr"
+org_friendly = "Frontmatter AI"
+is_pypi = true
+is_dockerhub = false
+editables = ["corio"]
+
+[tool.corio.metadata.setup]
+
+[tool.corio.dependencies]
+install = ["click", "PyYAML", "requests", "corio"]
+server = ["flask", "pyngrok"]
+
+[tool.corio.test-envs]
+dev = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tappack*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+tappack = ["pyproject.package.toml", "assets/**"]
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.tox]
+requires = ["tox>=4.22", "tox-uv>=1"]
+env_list = []
+
+[tool.tox.env]
+
+[tool.uv.config-settings-package.corio]
+editable_mode = "compat"
+
+[tool.uv.sources.corio]
+path = "../corio"
+editable = true
