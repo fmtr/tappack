@@ -13,11 +13,13 @@ def test_cli_skips_channel_only_dependency_without_matching_channel(tmp_path, mo
     (project / "manifest.yaml").write_text(
         "name: channel_app\n"
         "dependencies:\n"
-        "  extension:\n"
-        "    .channels:\n"
-        "      staging:\n"
-        "        .type: URL\n"
-        "        url: https://packages.invalid/extension.tapp\n",
+        "  - name: extension\n"
+        "    source:\n"
+        "      .channels:\n"
+        "        - channel: staging\n"
+        "          dependency:\n"
+        "            .type: URL\n"
+        "            url: https://packages.invalid/extension.tapp\n",
         encoding="utf-8",
     )
     (project / "entry.be").write_text("return true\n", encoding="utf-8")
@@ -26,7 +28,7 @@ def test_cli_skips_channel_only_dependency_without_matching_channel(tmp_path, mo
         def get(self, url, **_kwargs):
             pytest.fail(f"Unexpected request to {url}")
 
-    monkeypatch.setattr("tappack.package.https.client", Client())
+    monkeypatch.setattr("tappack.dm.dependencies.https.client", Client())
     output = tmp_path / "channel.tapp"
     arguments = ["tappack", "--module-path", str(project), "--output", str(output)]
     if channel_id:
@@ -48,10 +50,11 @@ def test_cli_skips_unselected_and_missing_version_patches(tmp_path, monkeypatch)
         "name: patch_app\n"
         "patches:\n"
         "  - .channels:\n"
-        "      staging:\n"
-        "        .type: Version\n"
-        "        path: release.be\n"
-        "        pattern: \"var VERSION = '{version}'\"\n"
+        "      - channel: staging\n"
+        "        patch:\n"
+        "          .type: Version\n"
+        "          path: release.be\n"
+        "          pattern: \"var VERSION = '{version}'\"\n"
         "  - .type: Version\n"
         "    path: absent.be\n"
         "    pattern: \"var VERSION = '{version}'\"\n",

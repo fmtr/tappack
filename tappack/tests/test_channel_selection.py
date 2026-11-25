@@ -14,11 +14,13 @@ def test_cli_uses_channel_only_local_dependency_for_matching_channel(tmp_path, m
     (project / "manifest.yaml").write_text(
         "name: channel_app\n"
         "dependencies:\n"
-        "  extension:\n"
-        "    .channels:\n"
-        "      staging:\n"
-        "        .type: LocalPath\n"
-        "        path: dependency\n",
+        "  - name: extension\n"
+        "    source:\n"
+        "      .channels:\n"
+        "        - channel: staging\n"
+        "          dependency:\n"
+        "            .type: LocalPath\n"
+        "            path: dependency\n",
         encoding="utf-8",
     )
     monkeypatch.chdir(tmp_path)

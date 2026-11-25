@@ -11,12 +11,13 @@ def test_cli_downloads_versioned_github_release_asset(tmp_path, monkeypatch):
     (project / "manifest.yaml").write_text(
         "name: release_app\n"
         "dependencies:\n"
-        "  extension:\n"
-        "    .type: GitHubReleaseAsset\n"
-        "    org: sample-org\n"
-        "    repo: sample-repo\n"
-        "    filename: extension.tapp\n"
-        "    version: 2.3.4\n",
+        "  - name: extension\n"
+        "    source:\n"
+        "      .type: GitHubReleaseAsset\n"
+        "      org: sample-org\n"
+        "      repo: sample-repo\n"
+        "      filename: extension.tapp\n"
+        "      version: 2.3.4\n",
         encoding="utf-8",
     )
     buffer = io.BytesIO()
@@ -37,7 +38,7 @@ def test_cli_downloads_versioned_github_release_asset(tmp_path, monkeypatch):
             )
             return Response()
 
-    monkeypatch.setattr("tappack.package.https.client", Client())
+    monkeypatch.setattr("tappack.dm.dependencies.https.client", Client())
     output = tmp_path / "release.tapp"
     monkeypatch.setattr(
         sys,

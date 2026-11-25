@@ -2,15 +2,18 @@ name: sample_app
 autoexec:
   import: false
   .channels:
-    development:
-      import: true
+    - channel: development
+      settings:
+        import: true
 dependencies:
-  shared:
-    .type: LocalPath
-    path: shared_library
+  - name: shared
+    source:
+      .type: LocalPath
+      path: shared_library
 patches:
   - .channels:
-      development:
-        .type: Version
-        path: src/version.be
-        pattern: "var VERSION = '{version}'"
+      - channel: development
+        patch:
+          .type: Version
+          path: src/version.be
+          pattern: "var VERSION = '{version}'"

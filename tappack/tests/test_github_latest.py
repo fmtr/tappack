@@ -11,11 +11,12 @@ def test_cli_rejects_latest_release_without_a_tag_before_writing(tmp_path, monke
     (project / "manifest.yaml").write_text(
         "name: tagless_app\n"
         "dependencies:\n"
-        "  extension:\n"
-        "    .type: GitHubReleaseAsset\n"
-        "    org: sample-org\n"
-        "    repo: sample-repo\n"
-        "    filename: extension.tapp\n",
+        "  - name: extension\n"
+        "    source:\n"
+        "      .type: GitHubReleaseAsset\n"
+        "      org: sample-org\n"
+        "      repo: sample-repo\n"
+        "      filename: extension.tapp\n",
         encoding="utf-8",
     )
     calls = []
@@ -34,7 +35,7 @@ def test_cli_rejects_latest_release_without_a_tag_before_writing(tmp_path, monke
             calls.append(url)
             return Response()
 
-    monkeypatch.setattr("tappack.package.https.client", Client())
+    monkeypatch.setattr("tappack.dm.dependencies.https.client", Client())
     output = tmp_path / "tagless.tapp"
     monkeypatch.setattr(
         sys,

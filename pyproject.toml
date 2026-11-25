@@ -9,7 +9,7 @@ description = "A packager for Tasmota Berry Application (TAPP) apps"
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
 keywords = ["development", "berry", "script", "tasmota", "tapp"]
-dependencies = ["corio[http,sets]~=2.20.0"]
+dependencies = ["corio[http,sets]~=2.20.1"]
 license = "Apache-2.0"
 
 [project.urls]
@@ -25,7 +25,7 @@ name = "Frontmatter AI"
 email = "innovative.fowler@mask.pro.fmtr.dev"
 
 [project.optional-dependencies]
-test = ["corio[test]~=2.20.0"]
+test = ["corio[test]~=2.20.1"]
 
 [tool.corio.metadata]
 version = "1.0.0-alpha.0"
@@ -42,6 +42,9 @@ editables = ["corio"]
 
 [tool.corio.test-envs]
 dev = ["dev"]
+
+[tool.setuptools]
+include-package-data = false
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -67,7 +70,7 @@ skip_install = true
 
 [tool.tox.env.prod]
 description = "Run tappack tests."
-deps = ["corio[test]~=2.20.0"]
+deps = ["corio[test]~=2.20.1"]
 commands = [["python", "-m", "pytest", "-q", "{posargs:tappack/tests}"]]
 install_command = ["uv", "pip", "install", "--refresh-package", "corio", "{opts}", "{packages}"]
 

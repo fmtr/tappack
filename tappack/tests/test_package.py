@@ -10,7 +10,12 @@ def test_cli_downloads_url_dependency_from_zip(tmp_path, monkeypatch):
     project = tmp_path / "download_project"
     project.mkdir()
     (project / "manifest.yaml").write_text(
-        "name: download_app\ndependencies:\n  extension: https://packages.invalid/extension.tapp\n",
+        "name: download_app\n"
+        "dependencies:\n"
+        "  - name: extension\n"
+        "    source:\n"
+        "      .type: URL\n"
+        "      url: https://packages.invalid/extension.tapp\n",
         encoding="utf-8",
     )
     (project / "entry.be").write_text("return true\n", encoding="utf-8")
@@ -29,7 +34,7 @@ def test_cli_downloads_url_dependency_from_zip(tmp_path, monkeypatch):
             assert url == "https://packages.invalid/extension.tapp"
             return Response()
 
-    monkeypatch.setattr("tappack.package.https.client", Client())
+    monkeypatch.setattr("tappack.dm.dependencies.https.client", Client())
     output = tmp_path / "download.tapp"
     monkeypatch.setattr(
         sys,
@@ -51,10 +56,11 @@ def test_cli_applies_channel_version_patch(tmp_path, monkeypatch):
         "name: patch_app\n"
         "patches:\n"
         "  - .channels:\n"
-        "      local:\n"
-        "        .type: Version\n"
-        "        path: source/version.be\n"
-        "        pattern: \"var VERSION = '{version}'\"\n",
+        "      - channel: local\n"
+        "        patch:\n"
+        "          .type: Version\n"
+        "          path: source/version.be\n"
+        "          pattern: \"var VERSION = '{version}'\"\n",
         encoding="utf-8",
     )
     (source / "version.be").write_text("var VERSION = '3.4.5'\n", encoding="utf-8")

@@ -2,16 +2,7 @@ from __future__ import annotations
 
 import io
 import zipfile
-from functools import cached_property
-
-from corio import Path, https
-
-from tappack.dm.dependencies import (
-    DependencySource,
-    GitHubReleaseAssetDependency,
-    LocalPathDependency,
-    URLDependency,
-)
+from corio import Path
 from tappack.dm.manifest import Manifest
 from tappack.dm.patch import VersionPatch
 from tappack.obs import logger
@@ -35,32 +26,16 @@ class Package:
             relative_path = path.relative_to(self.path)
             file_data[prefix / relative_path] = path.read_bytes()
 
-        for name, dependency_config in self.manifest.dependencies.items():
+        for dependency_config in self.manifest.dependencies:
+            name = dependency_config.name
             dependency = dependency_config.for_channel(self.channel_id)
             if dependency is None:
                 logger.warning(f'Skipping dependency "{name}": no matching channel configuration.')
                 continue
 
-            dependency_package = self.create_dependency(name, dependency)
-            file_data.update(dependency_package.iter_files(prefix / name))
+            file_data.update(dependency.iter_files(name, prefix / name, self.channel_id))
 
         return self.apply_patches(file_data, prefix)
-
-    def create_dependency(self, name: str, dependency: DependencySource) -> Package | URL:
-        match dependency:
-            case LocalPathDependency() as local:
-                return Package(local.path, name=name, channel_id=self.channel_id)
-            case URLDependency() as url:
-                return URL(name, url.url)
-            case GitHubReleaseAssetDependency() as asset:
-                return GitHubReleaseAsset(
-                    name=name,
-                    org=asset.org,
-                    repo=asset.repo,
-                    filename=asset.filename,
-                    version=asset.version,
-                    prefix=asset.prefix,
-                )
 
     def apply_patches(self, file_data: dict[Path, bytes], prefix: Path) -> dict[Path, bytes]:
         for patch_config in self.manifest.patches:
@@ -124,67 +99,3 @@ class Package:
         output_path.write_bytes(archive)
         logger.info(f'Wrote package ({len(archive)} bytes) to "{output_path}".')
         return output_path
-
-
-class URL:
-    def __init__(self, name: str, url: str):
-        self.name = name
-        self.url = url
-
-    def get_content(self) -> bytes:
-        logger.info(f'Downloading dependency "{self.name}" from "{self.url}".')
-        response = https.client.get(self.url)
-        response.raise_for_status()
-        return response.content
-
-    def iter_files(self, prefix: Path = Path(".")) -> dict[Path, bytes]:
-        with zipfile.ZipFile(io.BytesIO(self.get_content())) as archive:
-            return {
-                prefix / info.filename: archive.read(info.filename)
-                for info in archive.filelist
-                if not info.is_dir()
-            }
-
-
-class GitHubReleaseAsset(URL):
-    def __init__(
-        self,
-        name: str,
-        org: str,
-        repo: str,
-        filename: str,
-        version: str | None = None,
-        prefix: str = "v",
-    ):
-        self.name = name
-        self.org = org
-        self.repo = repo
-        self.filename = filename
-        self.version = version
-        self.prefix = prefix
-
-    @cached_property
-    def tag(self) -> str:
-        if self.version:
-            return f"{self.prefix}{self.version}"
-
-        url = f"https://api.github.com/repos/{self.org}/{self.repo}/releases/latest"
-        response = https.client.get(
-            url,
-            headers={
-                "Accept": "application/vnd.github+json",
-                "X-GitHub-Api-Version": "2022-11-28",
-            },
-        )
-        response.raise_for_status()
-        tag = response.json().get("tag_name")
-        if not tag:
-            raise ValueError(f'No release tag found for "{self.org}/{self.repo}".')
-        return tag
-
-    @cached_property
-    def url(self) -> str:
-        return (
-            f"https://github.com/{self.org}/{self.repo}/releases/download/"
-            f"{self.tag}/{self.filename}"
-        )
