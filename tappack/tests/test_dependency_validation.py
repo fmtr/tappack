@@ -52,8 +52,8 @@ def test_manifest_requires_nonempty_dependency_names(name):
         {
             "autoexec": {
                 ".channels": [
-                    {"channel": "preview", "settings": {"import": True}},
-                    {"channel": "preview", "settings": {"import": False}},
+                    {"channel": "preview", "import": True},
+                    {"channel": "preview", "import": False},
                 ],
             },
         },
@@ -63,19 +63,15 @@ def test_manifest_requires_nonempty_dependency_names(name):
                     ".channels": [
                         {
                             "channel": "preview",
-                            "patch": {
-                                ".type": "Version",
-                                "path": "version.be",
-                                "pattern": "{version}",
-                            },
+                            ".type": "Version",
+                            "path": "version.be",
+                            "pattern": "{version}",
                         },
                         {
                             "channel": "preview",
-                            "patch": {
-                                ".type": "Version",
-                                "path": "version.be",
-                                "pattern": "{version}",
-                            },
+                            ".type": "Version",
+                            "path": "version.be",
+                            "pattern": "{version}",
                         },
                     ],
                 },

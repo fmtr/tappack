@@ -3,8 +3,7 @@ autoexec:
   import: false
   .channels:
     - channel: local
-      settings:
-        import: true
+      import: true
 dependencies:
   - name: plugin
     source:

@@ -51,10 +51,9 @@ def test_cli_skips_unselected_and_missing_version_patches(tmp_path, monkeypatch)
         "patches:\n"
         "  - .channels:\n"
         "      - channel: staging\n"
-        "        patch:\n"
-        "          .type: Version\n"
-        "          path: release.be\n"
-        "          pattern: \"var VERSION = '{version}'\"\n"
+        "        .type: Version\n"
+        "        path: release.be\n"
+        "        pattern: \"var VERSION = '{version}'\"\n"
         "  - .type: Version\n"
         "    path: absent.be\n"
         "    pattern: \"var VERSION = '{version}'\"\n",

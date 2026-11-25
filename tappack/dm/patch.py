@@ -39,9 +39,8 @@ class VersionPatch(dm.Base):
         return expression.sub(replace, text).encode(self.encoding)
 
 
-class PatchChannelOverride(dm.Base):
+class PatchChannelOverride(VersionPatch):
     channel: str = Field(min_length=1)
-    patch: VersionPatch
 
 
 class ChannelPatch(dm.Base):
@@ -61,7 +60,7 @@ class ChannelPatch(dm.Base):
     def for_channel(self, channel_id: str | None) -> VersionPatch | None:
         override = self.channels.channel.get(channel_id)
         if override:
-            return override.patch
+            return override
         return None
 
 

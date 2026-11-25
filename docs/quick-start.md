@@ -6,14 +6,14 @@ Install `tappack` from PyPI:
 pip install tappack
 ```
 
-The repository contains a complete sample project and a local dependency. From the examples directory, package it with a channel-specific version patch:
+The repository contains a sample project with two named dependencies. From the examples directory, package the `development` channel to use its local tools override and channel-specific version patch:
 
 ```bash
 cd docs/examples
 tappack --module-path sample_app --output ./sample_app.tapp --channel-id development
 ```
 
-The command writes `sample_app.tapp` in the current directory. The manifest, Berry sources, and generated `autoexec.be` are stored in the archive; the local dependency is placed under the `shared/` directory.
+The command writes `sample_app.tapp` in the current directory. The manifest, Berry sources, and generated `autoexec.be` are stored in the archive. Dependencies are placed under their `name`: `helper_package/` comes from the local `shared_library` directory, and `tools_package/` uses the local `development_tools` directory because the `development` override is selected. Without that channel, `tools_package/` comes from the GitHub release asset.
 
 The example manifest is a real file used by the command above:
 

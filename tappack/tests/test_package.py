@@ -57,10 +57,9 @@ def test_cli_applies_channel_version_patch(tmp_path, monkeypatch):
         "patches:\n"
         "  - .channels:\n"
         "      - channel: local\n"
-        "        patch:\n"
-        "          .type: Version\n"
-        "          path: source/version.be\n"
-        "          pattern: \"var VERSION = '{version}'\"\n",
+        "        .type: Version\n"
+        "        path: source/version.be\n"
+        "        pattern: \"var VERSION = '{version}'\"\n",
         encoding="utf-8",
     )
     (source / "version.be").write_text("var VERSION = '3.4.5'\n", encoding="utf-8")

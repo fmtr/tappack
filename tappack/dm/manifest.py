@@ -12,8 +12,11 @@ from tappack.dm.patch import Patch
 MANIFEST_FILENAME = "manifest.yaml"
 
 
-class Autoexec(dm.Base):
+class AutoexecSettings(dm.Base):
     import_enabled: bool = Field(default=False, alias="import")
+
+
+class Autoexec(AutoexecSettings):
     channels: iterator.ilist[AutoexecChannelOverride] = Field(
         default_factory=iterator.ilist,
         alias=".channels",
@@ -30,16 +33,15 @@ class Autoexec(dm.Base):
             raise ValueError("Channel overrides must have unique channel IDs.")
         return channels
 
-    def for_channel(self, channel_id: str | None) -> Autoexec:
+    def for_channel(self, channel_id: str | None) -> AutoexecSettings:
         override = self.channels.channel.get(channel_id)
         if override:
-            return override.settings
+            return override
         return self
 
 
-class AutoexecChannelOverride(dm.Base):
+class AutoexecChannelOverride(AutoexecSettings):
     channel: str = Field(min_length=1)
-    settings: Autoexec
 
 
 class Manifest(sets.Base, dm.Base):
