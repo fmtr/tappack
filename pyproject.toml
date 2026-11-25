@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tappack"
-version = "1.0.0-alpha.1"
+version = "1.0.0-alpha.2"
 description = "A packager for Tasmota Berry Application (TAPP) apps"
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
@@ -28,7 +28,7 @@ email = "innovative.fowler@mask.pro.fmtr.dev"
 test = ["corio[test]~=2.20.1"]
 
 [tool.corio.metadata]
-version = "1.0.0-alpha.1"
+version = "1.0.0-alpha.2"
 base = "python"
 description = "A packager for Tasmota Berry Application (TAPP) apps"
 keywords = ["development", "berry", "script", "tasmota", "tapp"]
