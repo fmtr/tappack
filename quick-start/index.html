@@ -446,31 +446,48 @@
 <p>Install <code>tappack</code> from PyPI:</p>
 <div class="language-bash highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>tappack
 </code></pre></div>
-<p>The repository contains a complete sample project and a local dependency. From the examples directory, package it with a channel-specific version patch:</p>
+<p>The repository contains a sample project with two named dependencies. From the examples directory, package the <code>development</code> channel to use its local tools override and channel-specific version patch:</p>
 <div class="language-bash highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>docs/examples
 tappack<span class="w"> </span>--module-path<span class="w"> </span>sample_app<span class="w"> </span>--output<span class="w"> </span>./sample_app.tapp<span class="w"> </span>--channel-id<span class="w"> </span>development
 </code></pre></div>
-<p>The command writes <code>sample_app.tapp</code> in the current directory. The manifest, Berry sources, and generated <code>autoexec.be</code> are stored in the archive; the local dependency is placed under the <code>shared/</code> directory.</p>
+<p>The command writes <code>sample_app.tapp</code> in the current directory. The manifest, Berry sources, and generated <code>autoexec.be</code> are stored in the archive. Dependencies are placed under their <code>name</code>: <code>helper_package/</code> comes from the local <code>shared_library</code> directory, and <code>tools_package/</code> uses the local <code>development_tools</code> directory because the <code>development</code> override is selected. Without that channel, <code>tools_package/</code> comes from the GitHub release asset.</p>
 <p>The example manifest is a real file used by the command above:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sample_app</span>
+
 <span class="nt">autoexec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">import</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">  </span><span class="nt">.channels</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">development</span>
-<span class="w">      </span><span class="nt">settings</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">import</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">import</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
 <span class="nt">dependencies</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shared</span>
+<span class="w">  </span><span class="c1"># This local package is always included under helper_package/.</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">helper_package</span>
 <span class="w">    </span><span class="nt">source</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">.type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LocalPath</span>
 <span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shared_library</span>
+
+<span class="w">  </span><span class="c1"># Use the released tools package by default; replace it with a local copy for development.</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tools_package</span>
+<span class="w">    </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">.type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GitHubReleaseAsset</span>
+<span class="w">      </span><span class="nt">org</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fmtr</span>
+<span class="w">      </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tools.be</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tools.tapp</span>
+<span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2.1</span>
+<span class="w">      </span><span class="c1"># This override belongs to tools_package's source; other channels use the release asset.</span>
+<span class="w">      </span><span class="nt">.channels</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">development</span>
+<span class="w">          </span><span class="nt">dependency</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">.type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LocalPath</span>
+<span class="w">            </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">development_tools</span>
+
 <span class="nt">patches</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">.channels</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">development</span>
-<span class="w">        </span><span class="nt">patch</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">.type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Version</span>
-<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src/version.be</span>
-<span class="w">          </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s">"var</span><span class="nv"> </span><span class="s">VERSION</span><span class="nv"> </span><span class="s">=</span><span class="nv"> </span><span class="s">'{version}'"</span>
+<span class="w">        </span><span class="nt">.type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Version</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src/version.be</span>
+<span class="w">        </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="s">"var</span><span class="nv"> </span><span class="s">VERSION</span><span class="nv"> </span><span class="s">=</span><span class="nv"> </span><span class="s">'{version}'"</span>
 </code></pre></div>
 <h2 id="cli-options">CLI options</h2>
 <ul>

@@ -523,7 +523,7 @@
 </tr>
 </tbody>
 </table>
-<p><code>tappack</code> generates <code>autoexec.be</code> from the package's Berry file paths. Set <code>autoexec.import: true</code> to import the package during startup; the default is <code>false</code>. <code>autoexec</code>'s <code>.channels</code> field is a list of entries, each with a <code>channel</code> ID and nested <code>settings</code> object, as shown in the <a href="../quick-start/">sample manifest</a>.</p>
+<p><code>tappack</code> generates <code>autoexec.be</code> from the package's Berry file paths. Set <code>autoexec.import: true</code> to import the package during startup; the default is <code>false</code>. <code>autoexec</code>'s <code>.channels</code> field is a list of entries, each with a <code>channel</code> ID and the autoexec fields to use for that channel, as shown in the <a href="../quick-start/">sample manifest</a>.</p>
 <h2 id="dependencies">Dependencies</h2>
 <p>Each item under <code>dependencies</code> has a required <code>name</code> and a nested <code>source</code>. The name selects the output subdirectory. Put <code>.type</code> first inside each direct source. Supported source types are:</p>
 <table>
@@ -548,12 +548,12 @@
 </tr>
 </tbody>
 </table>
-<p>A channel-only source contains <code>.channels</code> instead of a top-level <code>.type</code>. A direct source can also contain <code>.channels</code> to override itself for selected channels. Each item in <code>.channels</code> has a <code>channel</code> ID and a nested <code>dependency</code> source. If no entry matches the selected channel, a channel-only dependency is skipped; a direct source remains the fallback.</p>
-<p>For a local dependency, invoke <code>tappack</code> from the directory that makes the source's <code>path</code> resolve correctly. In the repository example, the command runs from <code>docs/examples</code>, so <code>path: shared_library</code> selects the sibling directory.</p>
-<p>A complete example of nested dependency sources and channel-specific overrides is in the <a href="../examples/sample_app/manifest.yaml">sample manifest</a>.</p>
+<p>A channel-only source contains <code>.channels</code> instead of a top-level <code>.type</code>. A direct source can also contain <code>.channels</code> to override itself for selected channels. The <code>.channels</code> list belongs <strong>inside that dependency's <code>source</code></strong>, not beside the dependency entries. Each item has a <code>channel</code> ID and a nested <code>dependency</code> source. On a match, that nested source replaces the direct source; without a match, the direct source is used. A channel-only dependency with no matching entry is skipped.</p>
+<p>The <code>name</code> on each dependency selects its output directory. For local sources, <code>path</code> is resolved from the process's current working directory. In the sample, run <code>tappack</code> from <code>docs/examples</code>: <code>helper_package</code> uses <code>shared_library</code>, while the <code>development</code> override for <code>tools_package</code> uses <code>development_tools</code>.</p>
+<p>The <a href="../examples/sample_app/manifest.yaml">sample manifest</a> shows two dependency entries, one with a direct source and one with a channel override nested inside its source.</p>
 <h2 id="version-patches">Version patches</h2>
-<p>A patch entry uses <code>.type: Version</code> and includes a project-relative <code>path</code> and a regular-expression <code>pattern</code> containing <code>{version}</code>. The matched semantic version's patch component is increased by <code>inc_patch</code> (default <code>1</code>), then the selected channel and a build timestamp are added. Channel-specific patches use <code>.channels</code> as a list of entries with a <code>channel</code> and nested <code>patch</code> object.</p>
-<p>The sample manifest patches <code>src/version.be</code> for the <code>development</code> channel. With no matching channel patch, no patch is applied.</p>
+<p>A patch entry can be a direct <code>.type: Version</code> patch, which applies for every channel, or a <code>.channels</code> list. Each channel-list item puts <code>channel</code> beside the <code>.type: Version</code>, <code>path</code>, and <code>pattern</code> fields—there is no extra <code>patch</code> wrapper. Only the matching channel's patch is applied; if none matches, the patch is skipped.</p>
+<p>A version patch targets a project-relative <code>path</code> and a regular-expression <code>pattern</code> containing <code>{version}</code>. The matched semantic version's patch component is increased by <code>inc_patch</code> (default <code>1</code>), then the selected channel and a build timestamp are added. The sample manifest patches <code>src/version.be</code> only for the <code>development</code> channel.</p>
 
 
 

@@ -1,19 +1,36 @@
 name: sample_app
+
 autoexec:
   import: false
   .channels:
     - channel: development
-      settings:
-        import: true
+      import: true
+
 dependencies:
-  - name: shared
+  # This local package is always included under helper_package/.
+  - name: helper_package
     source:
       .type: LocalPath
       path: shared_library
+
+  # Use the released tools package by default; replace it with a local copy for development.
+  - name: tools_package
+    source:
+      .type: GitHubReleaseAsset
+      org: fmtr
+      repo: tools.be
+      filename: tools.tapp
+      version: 0.2.1
+      # This override belongs to tools_package's source; other channels use the release asset.
+      .channels:
+        - channel: development
+          dependency:
+            .type: LocalPath
+            path: development_tools
+
 patches:
   - .channels:
       - channel: development
-        patch:
-          .type: Version
-          path: src/version.be
-          pattern: "var VERSION = '{version}'"
+        .type: Version
+        path: src/version.be
+        pattern: "var VERSION = '{version}'"
