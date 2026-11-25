@@ -553,7 +553,7 @@
 <p>The <a href="../examples/sample_app/manifest.yaml">sample manifest</a> shows two dependency entries, one with a direct source and one with a channel override nested inside its source.</p>
 <h2 id="version-patches">Version patches</h2>
 <p>A patch entry can be a direct <code>.type: Version</code> patch, which applies for every channel, or a <code>.channels</code> list. Each channel-list item puts <code>channel</code> beside the <code>.type: Version</code>, <code>path</code>, and <code>pattern</code> fields—there is no extra <code>patch</code> wrapper. Only the matching channel's patch is applied; if none matches, the patch is skipped.</p>
-<p>A version patch targets a project-relative <code>path</code> and a regular-expression <code>pattern</code> containing <code>{version}</code>. The matched semantic version's patch component is increased by <code>inc_patch</code> (default <code>1</code>), then the selected channel and a build timestamp are added. The sample manifest patches <code>src/version.be</code> only for the <code>development</code> channel.</p>
+<p>A version patch targets a project-relative <code>path</code> and a regular-expression <code>pattern</code> containing <code>{version}</code>. Tappack parses the matched value as SemVer and increases its patch component by <code>inc_patch</code> (default <code>1</code>). If a channel is selected, its ID becomes the prerelease; a Corio-formatted build timestamp is added as build metadata. The sample manifest patches <code>src/version.be</code> only for the <code>development</code> channel.</p>
 
 
 
