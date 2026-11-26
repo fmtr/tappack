@@ -364,10 +364,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#version-patches" class="md-nav__link">
+  <a href="#version-metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Version patches
+        Version metadata
       
     </span>
   </a>
@@ -417,6 +417,8 @@
   
     
     
+      
+        
       
         
       
@@ -488,6 +490,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/1.0.1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1.0.1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -544,10 +574,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#version-patches" class="md-nav__link">
+  <a href="#version-metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Version patches
+        Version metadata
       
     </span>
   </a>
@@ -575,8 +605,8 @@
 
 
 <h1 id="manifest-reference">Manifest reference</h1>
-<p>A project can contain a <code>manifest.yml</code> at its root. <code>tappack</code> searches upward from <code>--module-path</code> for this file. If no manifest is found, it packages the directory using its name and does not resolve dependencies or patches.</p>
-<p>The manifest describes the package name, version metadata, startup behavior, dependencies, and optional version patches. The runnable sample is <a href="../quick-start/">embedded in the quick start</a>.</p>
+<p>A project can contain a <code>manifest.yml</code> at its root. <code>tappack</code> searches upward from <code>--module-path</code> for this file. If no manifest is found, it packages the directory using its name and has no declared dependencies.</p>
+<p>The manifest describes the package name, version metadata, startup behavior, and dependencies. The runnable sample is <a href="../quick-start/">embedded in the quick start</a>.</p>
 <h2 id="top-level-fields">Top-level fields</h2>
 <table>
 <thead>
@@ -607,15 +637,10 @@
 <td>list of objects</td>
 <td>Each object has a unique <code>name</code> and a dependency source. The name becomes the output subdirectory.</td>
 </tr>
-<tr>
-<td><code>patches</code></td>
-<td>list</td>
-<td>File changes applied while packaging, including channel-specific version updates.</td>
-</tr>
 </tbody>
 </table>
-<p><code>metadata.version</code> is the current project SemVer used as the base for automatic version patches. The Corio metadata fields <code>org_github</code>, <code>org_friendly</code>, <code>description</code>, <code>docs</code>, and <code>link_id</code> are optional; <code>link_id</code> selects a short URL to update after a Corio release. API credentials remain environment variables.</p>
-<p><code>tappack</code> generates <code>autoexec.be</code> from the package's Berry file paths. Set <code>autoexec.import: true</code> to import the package during startup; the default is <code>false</code>. <code>autoexec</code>'s <code>.channels</code> field is a list of entries, each with a <code>channel</code> ID and the autoexec fields to use for that channel, as shown in the <a href="../quick-start/">sample manifest</a>.</p>
+<p><code>metadata.version</code> is the package version recorded in generated startup metadata unless overridden with <code>--version</code>. The Corio metadata fields <code>org_github</code>, <code>org_friendly</code>, <code>description</code>, <code>docs</code>, and <code>link_id</code> are optional; <code>link_id</code> selects a short URL to update after a Corio release. API credentials remain environment variables.</p>
+<p><code>tappack</code> generates <code>autoexec.be</code> from the package's Berry file paths and metadata. Set <code>autoexec.import: true</code> to import the package during startup; the default is <code>false</code>. <code>autoexec</code>'s <code>.channels</code> field is a list of entries, each with a <code>channel</code> ID and the autoexec fields to use for that channel, as shown in the <a href="../quick-start/">sample manifest</a>. The version is available to Berry code in the package's <code>TAPP_METADATA</code> entry. Source files are included unchanged.</p>
 <h2 id="dependencies">Dependencies</h2>
 <p>Each item under <code>dependencies</code> has a required <code>name</code> and a nested <code>source</code>. The name selects the output subdirectory. Put <code>.type</code> first inside each direct source. Supported source types are:</p>
 <table>
@@ -643,9 +668,8 @@
 <p>A channel-only source contains <code>.channels</code> instead of a top-level <code>.type</code>. A direct source can also contain <code>.channels</code> to override itself for selected channels. The <code>.channels</code> list belongs <strong>inside that dependency's <code>source</code></strong>, not beside the dependency entries. Each item has a <code>channel</code> ID and a nested <code>dependency</code> source. On a match, that nested source replaces the direct source; without a match, the direct source is used. A channel-only dependency with no matching entry is skipped.</p>
 <p>The <code>name</code> on each dependency selects its output directory. For local sources, <code>path</code> is resolved from the process's current working directory. In the sample, run <code>tappack</code> from <code>docs/examples</code>: <code>helper_package</code> uses <code>shared_library</code>, while the <code>development</code> override for <code>tools_package</code> uses <code>development_tools</code>.</p>
 <p>The <a href="../examples/sample_app/manifest.yml">sample manifest</a> shows two dependency entries, one with a direct source and one with a channel override nested inside its source.</p>
-<h2 id="version-patches">Version patches</h2>
-<p>A patch entry can be a direct <code>.type: Version</code> patch, which applies for every channel, or a <code>.channels</code> list. Each channel-list item puts <code>channel</code> beside the <code>.type: Version</code>, <code>path</code>, and <code>pattern</code> fields—there is no extra <code>patch</code> wrapper. Only the matching channel's patch is applied; if none matches, the patch is skipped.</p>
-<p>A version patch targets a project-relative <code>path</code> and a regular-expression <code>pattern</code> containing <code>{version}</code>. Without <code>--version</code>, Tappack increments <code>metadata.version</code> by <code>inc_patch</code> (default <code>1</code>), applies the selected channel as the prerelease, and adds a build timestamp. With <code>--version</code>, Tappack writes that exact SemVer value into the patched file without incrementing or adding channel/build metadata. Version patches require <code>metadata.version</code> unless <code>--version</code> is supplied. The sample manifest patches <code>src/version.be</code> only for the <code>development</code> channel.</p>
+<h2 id="version-metadata">Version metadata</h2>
+<p>The generated <code>autoexec.be</code> adds a <code>version</code> value to the package's <code>TAPP_METADATA</code> entry. It uses <code>metadata.version</code> from the manifest, or the exact value supplied through <code>--version</code> when provided. If neither is set, the generated value is <code>nil</code>. Packaging does not rewrite Berry source files; put application-specific version handling in the source code that needs it.</p>
 
 
 
