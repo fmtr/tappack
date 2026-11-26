@@ -1,6 +1,7 @@
 import sys
 import zipfile
 
+from tappack.constants import FileName
 from tappack.entrypoint import main
 
 
@@ -11,7 +12,7 @@ def test_cli_uses_channel_only_local_dependency_for_matching_channel(tmp_path, m
     nested = dependency / "nested"
     nested.mkdir(parents=True)
     (nested / "extension.be").write_text("return true\n", encoding="utf-8")
-    (project / "manifest.yml").write_text(
+    (project / FileName.MANIFEST).write_text(
         "name: channel_app\n"
         "dependencies:\n"
         "  - name: extension\n"

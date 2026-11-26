@@ -2,13 +2,14 @@ import sys
 
 import pytest
 
+from tappack.constants import FileName
 from tappack.entrypoint import main
 
 
 def test_cli_rejects_latest_release_without_a_tag_before_writing(tmp_path, monkeypatch):
     project = tmp_path / "tagless_project"
     project.mkdir()
-    (project / "manifest.yml").write_text(
+    (project / FileName.MANIFEST).write_text(
         "name: tagless_app\n"
         "dependencies:\n"
         "  - name: extension\n"

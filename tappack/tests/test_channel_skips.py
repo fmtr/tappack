@@ -3,14 +3,19 @@ import zipfile
 
 import pytest
 
+from tappack.constants import FileName
 from tappack.entrypoint import main
 
 
 @pytest.mark.parametrize("channel_id", [None, "unlisted"])
-def test_cli_skips_channel_only_dependency_without_matching_channel(tmp_path, monkeypatch, channel_id):
+def test_cli_skips_channel_only_dependency_without_matching_channel(
+    tmp_path,
+    monkeypatch,
+    channel_id,
+):
     project = tmp_path / "channel_project"
     project.mkdir()
-    (project / "manifest.yml").write_text(
+    (project / FileName.MANIFEST).write_text(
         "name: channel_app\n"
         "dependencies:\n"
         "  - name: extension\n"
@@ -41,33 +46,3 @@ def test_cli_skips_channel_only_dependency_without_matching_channel(tmp_path, mo
         members = archive.namelist()
         assert "entry.be" in members
         assert not any(member.startswith("extension/") for member in members)
-
-
-def test_cli_skips_unselected_and_missing_version_patches(tmp_path, monkeypatch):
-    project = tmp_path / "patch_project"
-    project.mkdir()
-    (project / "manifest.yml").write_text(
-        "name: patch_app\n"
-        "patches:\n"
-        "  - .channels:\n"
-        "      - channel: staging\n"
-        "        .type: Version\n"
-        "        path: release.be\n"
-        "        pattern: \"var VERSION = '{version}'\"\n"
-        "  - .type: Version\n"
-        "    path: absent.be\n"
-        "    pattern: \"var VERSION = '{version}'\"\n",
-        encoding="utf-8",
-    )
-    (project / "release.be").write_text("var VERSION = '4.2.1'\n", encoding="utf-8")
-    output = tmp_path / "unpatched.tapp"
-    monkeypatch.setattr(
-        sys,
-        "argv",
-        ["tappack", "--module-path", str(project), "--output", str(output)],
-    )
-
-    main()
-
-    with zipfile.ZipFile(output) as archive:
-        assert archive.read("release.be") == b"var VERSION = '4.2.1'\n"

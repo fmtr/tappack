@@ -4,6 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from tappack.dm.manifest import Manifest
+from tappack.constants import FileName
 from tappack.entrypoint import main
 
 
@@ -57,26 +58,6 @@ def test_manifest_requires_nonempty_dependency_names(name):
                 ],
             },
         },
-        {
-            "patches": [
-                {
-                    ".channels": [
-                        {
-                            "channel": "preview",
-                            ".type": "Version",
-                            "path": "version.be",
-                            "pattern": "{version}",
-                        },
-                        {
-                            "channel": "preview",
-                            ".type": "Version",
-                            "path": "version.be",
-                            "pattern": "{version}",
-                        },
-                    ],
-                },
-            ],
-        },
     ],
 )
 def test_manifest_rejects_duplicate_channel_overrides(manifest_data):
@@ -87,7 +68,7 @@ def test_manifest_rejects_duplicate_channel_overrides(manifest_data):
 def test_cli_rejects_duplicate_dependency_names_without_writing(tmp_path, monkeypatch):
     project = tmp_path / "duplicate_project"
     project.mkdir()
-    (project / "manifest.yml").write_text(
+    (project / FileName.MANIFEST).write_text(
         "dependencies:\n"
         "  - name: widget\n"
         "    source:\n"
@@ -121,7 +102,7 @@ def test_cli_rejects_duplicate_dependency_names_without_writing(tmp_path, monkey
 def test_cli_rejects_missing_local_dependency_without_writing(tmp_path, monkeypatch):
     project = tmp_path / "local_project"
     project.mkdir()
-    (project / "manifest.yml").write_text(
+    (project / FileName.MANIFEST).write_text(
         "name: local_app\n"
         "dependencies:\n"
         "  - name: extension\n"

@@ -3,13 +3,14 @@ import sys
 import pytest
 from pydantic import ValidationError
 
+from tappack.constants import FileName
 from tappack.entrypoint import main
 
 
 def test_cli_rejects_incomplete_remote_dependency_before_writing(tmp_path, monkeypatch):
     project = tmp_path / "invalid_project"
     project.mkdir()
-    (project / "manifest.yml").write_text(
+    (project / FileName.MANIFEST).write_text(
         "name: invalid_app\n"
         "dependencies:\n"
         "  - name: extension\n"

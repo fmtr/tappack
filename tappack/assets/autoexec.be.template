@@ -14,6 +14,7 @@ TAPP_METADATA['{module_name}']={
     'path': tasmota.wd,
     'import': {import},
     'channel_id': {channel_id},
+    'version': {version},
 }
 
 if TAPP_METADATA['{module_name}']['import']

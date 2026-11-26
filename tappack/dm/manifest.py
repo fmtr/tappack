@@ -5,11 +5,8 @@ from typing import Any
 from pydantic import Field, field_validator
 
 from corio import Constants, Path, dm, iterator, version
+from tappack.constants import FileName
 from tappack.dm.dependencies import DependencyEntry
-from tappack.dm.patch import Patch
-
-
-MANIFEST_FILENAME = "manifest.yml"
 
 
 class Metadata(dm.Base):
@@ -65,7 +62,6 @@ class Manifest(dm.Base):
     metadata: Metadata = Field(default_factory=Metadata)
     autoexec: Autoexec = Field(default_factory=Autoexec)
     dependencies: list[DependencyEntry] = Field(default_factory=list)
-    patches: list[Patch] = Field(default_factory=list)
 
     @field_validator("dependencies")
     @classmethod
@@ -84,7 +80,7 @@ class Manifest(dm.Base):
     def in_directory(cls, directory: Path) -> Manifest:
         directory_path = Path(directory).resolve()
         try:
-            manifest_path = directory_path.find_up(MANIFEST_FILENAME)
+            manifest_path = directory_path.find_up(FileName.MANIFEST)
         except FileNotFoundError:
             return cls()
 

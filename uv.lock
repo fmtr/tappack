@@ -2,11 +2,6 @@ version = 1
 revision = 5
 requires-python = ">=3.12, <3.15"
 
-[options]
-
-[options.prerelease-package]
-corio = "if-necessary"
-
 [[package]]
 name = "annotated-types"
 version = "0.8.0"
@@ -157,7 +152,7 @@ wheels = [
 
 [[package]]
 name = "corio"
-version = "2.20.1"
+version = "2.21.1"
 source = { editable = "../corio" }
 dependencies = [
     { name = "cached-classproperty" },
@@ -537,9 +532,9 @@ requires-dist = [
     { name = "tabulate", marker = "extra == 'metrics'" },
     { name = "tabulate", marker = "extra == 'semantic'" },
     { name = "tabulate", marker = "extra == 'tabular'" },
-    { name = "tappack", marker = "extra == 'all'", specifier = ">=1.0.0a3" },
-    { name = "tappack", marker = "extra == 'dev'", specifier = ">=1.0.0a3" },
-    { name = "tappack", marker = "extra == 'infra'", specifier = ">=1.0.0a3" },
+    { name = "tappack", marker = "extra == 'all'", specifier = ">=1.0.0" },
+    { name = "tappack", marker = "extra == 'dev'", specifier = ">=1.0.0" },
+    { name = "tappack", marker = "extra == 'infra'", specifier = ">=1.0.0" },
     { name = "tinynetrc", marker = "extra == 'all'" },
     { name = "tinynetrc", marker = "extra == 'netrc'" },
     { name = "tinynetrc", marker = "extra == 'spaces'" },
@@ -622,7 +617,7 @@ dev = [
     { name = "qdrant-client" },
     { name = "ripgrep-rs" },
     { name = "setuptools" },
-    { name = "tappack", specifier = ">=1.0.0a3" },
+    { name = "tappack", specifier = ">=1.0.0" },
     { name = "tomlkit" },
     { name = "twine" },
     { name = "uvicorn", extras = ["standard"] },
@@ -1346,7 +1341,7 @@ wheels = [
 
 [[package]]
 name = "tappack"
-version = "1.0.0a3"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "corio", extra = ["http", "sets"] },

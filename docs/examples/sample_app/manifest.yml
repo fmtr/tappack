@@ -29,10 +29,3 @@ dependencies:
           dependency:
             .type: LocalPath
             path: development_tools
-
-patches:
-  - .channels:
-      - channel: development
-        .type: Version
-        path: src/version.be
-        pattern: "var VERSION = '{version}'"

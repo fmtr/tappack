@@ -1,8 +1,8 @@
 # Manifest reference
 
-A project can contain a `manifest.yml` at its root. `tappack` searches upward from `--module-path` for this file. If no manifest is found, it packages the directory using its name and does not resolve dependencies or patches.
+A project can contain a `manifest.yml` at its root. `tappack` searches upward from `--module-path` for this file. If no manifest is found, it packages the directory using its name and has no declared dependencies.
 
-The manifest describes the package name, version metadata, startup behavior, dependencies, and optional version patches. The runnable sample is [embedded in the quick start](quick-start.md).
+The manifest describes the package name, version metadata, startup behavior, and dependencies. The runnable sample is [embedded in the quick start](quick-start.md).
 
 ## Top-level fields
 
@@ -12,11 +12,10 @@ The manifest describes the package name, version metadata, startup behavior, dep
 | `metadata` | object | Optional project metadata, including the current `version` and Corio release settings. |
 | `autoexec` | object | Controls the generated startup file. |
 | `dependencies` | list of objects | Each object has a unique `name` and a dependency source. The name becomes the output subdirectory. |
-| `patches` | list | File changes applied while packaging, including channel-specific version updates. |
 
-`metadata.version` is the current project SemVer used as the base for automatic version patches. The Corio metadata fields `org_github`, `org_friendly`, `description`, `docs`, and `link_id` are optional; `link_id` selects a short URL to update after a Corio release. API credentials remain environment variables.
+`metadata.version` is the package version recorded in generated startup metadata unless overridden with `--version`. The Corio metadata fields `org_github`, `org_friendly`, `description`, `docs`, and `link_id` are optional; `link_id` selects a short URL to update after a Corio release. API credentials remain environment variables.
 
-`tappack` generates `autoexec.be` from the package's Berry file paths. Set `autoexec.import: true` to import the package during startup; the default is `false`. `autoexec`'s `.channels` field is a list of entries, each with a `channel` ID and the autoexec fields to use for that channel, as shown in the [sample manifest](quick-start.md).
+`tappack` generates `autoexec.be` from the package's Berry file paths and metadata. Set `autoexec.import: true` to import the package during startup; the default is `false`. `autoexec`'s `.channels` field is a list of entries, each with a `channel` ID and the autoexec fields to use for that channel, as shown in the [sample manifest](quick-start.md). The version is available to Berry code in the package's `TAPP_METADATA` entry. Source files are included unchanged.
 
 ## Dependencies
 
@@ -34,8 +33,6 @@ The `name` on each dependency selects its output directory. For local sources, `
 
 The [sample manifest](examples/sample_app/manifest.yml) shows two dependency entries, one with a direct source and one with a channel override nested inside its source.
 
-## Version patches
+## Version metadata
 
-A patch entry can be a direct `.type: Version` patch, which applies for every channel, or a `.channels` list. Each channel-list item puts `channel` beside the `.type: Version`, `path`, and `pattern` fields—there is no extra `patch` wrapper. Only the matching channel's patch is applied; if none matches, the patch is skipped.
-
-A version patch targets a project-relative `path` and a regular-expression `pattern` containing `{version}`. Without `--version`, Tappack increments `metadata.version` by `inc_patch` (default `1`), applies the selected channel as the prerelease, and adds a build timestamp. With `--version`, Tappack writes that exact SemVer value into the patched file without incrementing or adding channel/build metadata. Version patches require `metadata.version` unless `--version` is supplied. The sample manifest patches `src/version.be` only for the `development` channel.
+The generated `autoexec.be` adds a `version` value to the package's `TAPP_METADATA` entry. It uses `metadata.version` from the manifest, or the exact value supplied through `--version` when provided. If neither is set, the generated value is `nil`. Packaging does not rewrite Berry source files; put application-specific version handling in the source code that needs it.

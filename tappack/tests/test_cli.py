@@ -5,6 +5,7 @@ import zipfile
 import pytest
 from pydantic import ValidationError
 
+from tappack.constants import FileName
 from tappack.entrypoint import main
 from tappack.paths import paths
 
@@ -39,7 +40,7 @@ def test_cli_packages_local_channel_dependency_and_generates_autoexec(tmp_path, 
         assert archive.read("src/entry.be") == b'return { kind: "sample" }\n'
         assert archive.read("tasks/worker.be") == b"return true\n"
         assert archive.read("plugin/nested/library.be") == b"return { ready: true }\n"
-        autoexec = archive.read("autoexec.be").decode("utf-8")
+        autoexec = archive.read(FileName.AUTOEXEC).decode("utf-8")
 
     assert "src" in autoexec
     assert "tasks" in autoexec
@@ -59,7 +60,7 @@ def test_cli_defaults_output_name_to_directory_without_manifest(tmp_path, monkey
 
     with zipfile.ZipFile(tmp_path / "loose_project.tapp") as archive:
         assert archive.read("entry.be") == b"return true\n"
-        assert "autoexec.be" in archive.namelist()
+        assert FileName.AUTOEXEC in archive.namelist()
 
 
 def test_cli_rejects_missing_module_without_creating_output(tmp_path, monkeypatch):

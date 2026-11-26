@@ -1,27 +1,27 @@
 import io
-import re
 import sys
 import zipfile
 
+from tappack.constants import FileName
 from tappack.entrypoint import main
 
 
 def test_cli_downloads_url_dependency_from_zip(tmp_path, monkeypatch):
     project = tmp_path / "download_project"
     project.mkdir()
-    (project / "manifest.yml").write_text(
-        "name: download_app\n"
+    (project / FileName.MANIFEST).write_text(
+        "name: archive_app\n"
         "dependencies:\n"
-        "  - name: extension\n"
+        "  - name: addon\n"
         "    source:\n"
         "      .type: URL\n"
-        "      url: https://packages.invalid/extension.tapp\n",
+        "      url: https://bundles.invalid/addon.tapp\n",
         encoding="utf-8",
     )
     (project / "entry.be").write_text("return true\n", encoding="utf-8")
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w") as archive:
-        archive.writestr("nested/extension.be", "return { remote: true }\n")
+        archive.writestr("nested/addon.be", "return { available: true }\n")
 
     class Response:
         content = buffer.getvalue()
@@ -31,7 +31,7 @@ def test_cli_downloads_url_dependency_from_zip(tmp_path, monkeypatch):
 
     class Client:
         def get(self, url, **_kwargs):
-            assert url == "https://packages.invalid/extension.tapp"
+            assert url == "https://bundles.invalid/addon.tapp"
             return Response()
 
     monkeypatch.setattr("tappack.dm.dependencies.https.client", Client())
@@ -45,67 +45,51 @@ def test_cli_downloads_url_dependency_from_zip(tmp_path, monkeypatch):
     main()
 
     with zipfile.ZipFile(output) as archive:
-        assert archive.read("extension/nested/extension.be") == b"return { remote: true }\n"
+        assert archive.read("addon/nested/addon.be") == b"return { available: true }\n"
 
 
-def test_cli_applies_channel_version_patch(tmp_path, monkeypatch):
-    project = tmp_path / "patch_project"
+def test_cli_writes_manifest_version_to_autoexec_metadata(tmp_path, monkeypatch):
+    project = tmp_path / "versioned_project"
     source = project / "source"
     source.mkdir(parents=True)
-    (project / "manifest.yml").write_text(
-        "name: patch_app\n"
+    (project / FileName.MANIFEST).write_text(
+        "name: versioned_app\n"
         "metadata:\n"
-        "  version: 3.4.5\n"
-        "patches:\n"
-        "  - .channels:\n"
-        "      - channel: local\n"
-        "        .type: Version\n"
-        "        path: source/version.be\n"
-        "        pattern: \"var VERSION = '{version}'\"\n",
+        "  version: 6.3.8\n",
         encoding="utf-8",
     )
-    (source / "version.be").write_text("var VERSION = '0.1.2'\n", encoding="utf-8")
-    output = tmp_path / "patched.tapp"
+    source_file = source / "version.be"
+    original_source = b"var VERSION = '0.2.1'\n"
+    source_file.write_bytes(original_source)
+    output = tmp_path / "versioned.tapp"
     monkeypatch.setattr(
         sys,
         "argv",
-        [
-            "tappack",
-            "--module-path",
-            str(project),
-            "--output",
-            str(output),
-            "--channel-id",
-            "local",
-        ],
+        ["tappack", "--module-path", str(project), "--output", str(output)],
     )
 
     main()
 
     with zipfile.ZipFile(output) as archive:
-        version_text = archive.read("source/version.be").decode("utf-8")
+        assert archive.read("source/version.be") == original_source
+        autoexec = archive.read(FileName.AUTOEXEC).decode("utf-8")
 
-    assert re.fullmatch(
-        r"var VERSION = '3\.4\.6-local\+\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}'\n",
-        version_text,
-    )
+    assert "'version': '6.3.8'" in autoexec
+    assert (project / FileName.AUTOEXEC).read_text(encoding="utf-8") == autoexec
 
 
-def test_cli_pinned_version_replaces_package_version_exactly(tmp_path, monkeypatch):
+def test_cli_pinned_version_is_written_to_autoexec_metadata(tmp_path, monkeypatch):
     project = tmp_path / "pinned_project"
-    source = project / "source"
-    source.mkdir(parents=True)
-    (project / "manifest.yml").write_text(
+    project.mkdir()
+    (project / FileName.MANIFEST).write_text(
         "name: pinned_app\n"
         "metadata:\n"
-        "  version: 3.4.5\n"
-        "patches:\n"
-        "  - .type: Version\n"
-        "    path: source/version.be\n"
-        "    pattern: \"var VERSION = '{version}'\"\n",
+        "  version: 6.3.8\n",
         encoding="utf-8",
     )
-    (source / "version.be").write_text("var VERSION = '0.1.2'\n", encoding="utf-8")
+    source_file = project / "entry.be"
+    original_source = b"var VERSION = '0.2.1'\n"
+    source_file.write_bytes(original_source)
     output = tmp_path / "pinned.tapp"
     monkeypatch.setattr(
         sys,
@@ -116,16 +100,15 @@ def test_cli_pinned_version_replaces_package_version_exactly(tmp_path, monkeypat
             str(project),
             "--output",
             str(output),
-            "--channel-id",
-            "local",
             "--version",
-            "7.2.0-rc.3",
+            "8.4.1-rc.2",
         ],
     )
 
     main()
 
     with zipfile.ZipFile(output) as archive:
-        version_text = archive.read("source/version.be").decode("utf-8")
+        assert archive.read("entry.be") == original_source
+        autoexec = archive.read(FileName.AUTOEXEC).decode("utf-8")
 
-    assert version_text == "var VERSION = '7.2.0-rc.3'\n"
+    assert "'version': '8.4.1-rc.2'" in autoexec

@@ -2,13 +2,14 @@ import io
 import sys
 import zipfile
 
+from tappack.constants import FileName
 from tappack.entrypoint import main
 
 
 def test_cli_downloads_versioned_github_release_asset(tmp_path, monkeypatch):
     project = tmp_path / "release_project"
     project.mkdir()
-    (project / "manifest.yml").write_text(
+    (project / FileName.MANIFEST).write_text(
         "name: release_app\n"
         "dependencies:\n"
         "  - name: extension\n"

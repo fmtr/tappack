@@ -3,8 +3,8 @@ from __future__ import annotations
 import io
 import zipfile
 from corio import Path
+from tappack.constants import FileName
 from tappack.dm.manifest import Manifest
-from tappack.dm.patch import VersionPatch
 from tappack.obs import logger
 from tappack.paths import paths
 
@@ -22,6 +22,10 @@ class Package:
         self.version = version
         self.manifest = Manifest.in_directory(self.path)
         self.name = name or self.manifest.name or self.path.name
+
+    @property
+    def autoexec_path(self) -> Path:
+        return self.path / FileName.AUTOEXEC
 
     def iter_files(self, prefix: Path = Path(".")) -> dict[Path, bytes]:
         logger.info(f'Collecting package files from "{self.path}".')
@@ -42,29 +46,6 @@ class Package:
 
             file_data.update(dependency.iter_files(name, prefix / name, self.channel_id))
 
-        return self.apply_patches(file_data, prefix)
-
-    def apply_patches(self, file_data: dict[Path, bytes], prefix: Path) -> dict[Path, bytes]:
-        for patch_config in self.manifest.patches:
-            patch = patch_config.for_channel(self.channel_id)
-            if patch is None:
-                continue
-
-            target = prefix / patch.path
-            if target not in file_data:
-                logger.warning(
-                    f'Manifest for "{self.name}" defines a patch for "{patch.path}", but the file was not found.'
-                )
-                continue
-
-            logger.info(f'Applying version patch to "{target}".')
-            file_data[target] = patch.apply(
-                file_data[target],
-                self.channel_id,
-                self.manifest.metadata.version,
-                self.version,
-            )
-
         return file_data
 
     def generate_autoexec(self, file_data: dict[Path, bytes]) -> str:
@@ -77,24 +58,30 @@ class Package:
             key=str,
         )
         path_names = [str(path) for path in module_paths]
-        template = (paths.assets / "autoexec.be.template").read_text(encoding="utf-8")
+        template = (paths.assets / FileName.AUTOEXEC_TEMPLATE).read_text(encoding="utf-8")
         autoexec = self.manifest.autoexec.for_channel(self.channel_id)
+        version = self.version if self.version is not None else self.manifest.metadata.version
+        version_value = repr(version) if version is not None else "nil"
         replacements = {
             "paths": repr(path_names),
             "module_name": self.name,
             "import": str(autoexec.import_enabled).lower(),
             "channel_id": repr(self.channel_id) if self.channel_id else "nil",
+            "version": version_value,
         }
 
         for key, replacement in replacements.items():
             template = template.replace(f"{{{key}}}", replacement)
 
-        logger.info(f'Generated autoexec.be with module paths {path_names}.')
+        logger.info(f'Generated {FileName.AUTOEXEC} with module paths {path_names}.')
         return template
 
     def build_archive(self) -> io.BytesIO:
         file_data = self.iter_files()
-        file_data[Path("autoexec.be")] = self.generate_autoexec(file_data).encode("utf-8")
+        autoexec_content = self.generate_autoexec(file_data).encode("utf-8")
+        self.autoexec_path.write_bytes(autoexec_content)
+        logger.info(f'Wrote generated {FileName.AUTOEXEC} to "{self.autoexec_path}".')
+        file_data[Path(FileName.AUTOEXEC)] = autoexec_content
         buffer = io.BytesIO()
 
         with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_STORED) as archive:
